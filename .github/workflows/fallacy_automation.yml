@@ -53,10 +53,14 @@ jobs:
         run: |
           python .github/workflows/run_fallacy_analysis.py
 
+      - name: Ensure Output Directories Exist
+        run: |
+          mkdir -p data output_images generated_cards
+
       - name: Commit and Push Results
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/ generated_cards/ || true
+          git add data/ output_images/ generated_cards/ || true
           git diff --staged --quiet || git commit -m "Auto-update: New fallacy cards generated [skip ci]"
           git push
