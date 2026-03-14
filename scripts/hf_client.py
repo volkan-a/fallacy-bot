@@ -1,50 +1,55 @@
 #!/usr/bin/env python3
 """
-Hugging Face LLM client using direct requests to router.huggingface.co.
+Hugging Face LLM client using InferenceClient.
+Using Zephyr-7b-beta: The most reliable model on Free Inference API.
 """
 
 import os
-import requests
 import logging
 from typing import Dict, Optional
+from huggingface_hub import InferenceClient
 
 logger = logging.getLogger(__name__)
 
-# Model: Fallacy detection specific model
-HF_MODEL = "mrm8488/logical-fallacy-detection"
-# MUST use router.huggingface.co
-HF_API_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL}"
-HF_TOKEN = os.getenv("HF_TOKEN", "")
+# Zephyr 7b beta: Hugging Face'in en stabil çalışan ücretsiz modeli
+HF_MODEL = "HuggingFaceH4/zephyr-7b-beta"
+
+# client endpoint'i otomatik yönlendirir
+client = InferenceClient(model=HF_MODEL, token=os.getenv("HF_TOKEN"))
 
 
 def analyze_fallacy(text: str) -> Optional[Dict]:
-    """Analyze text for logical fallacies using raw requests."""
+    """Analyze text for logical fallacies using Hugging Face LLM."""
+    from scripts.fallacy_prompts import (
+        create_fallacy_detection_prompt,
+        parse_fallacy_response,
+        get_confidence_level,
+    )
     from scripts.fallacy_types import is_valid_fallacy_type
 
-    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
-    payload = {"inputs": text[:500]}
+    prompt = create_fallacy_detection_prompt(text)
 
     try:
-        response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
+        # Chat model olduğu için chat_completion kullanıyoruz
+        response = client.chat_completion(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=500,
+            temperature=0.3,
+        )
 
-        if response.status_code == 200:
-            result_list = response.json()
-            if isinstance(result_list, list) and len(result_list) > 0:
-                # Get label with highest score
-                best_match = max(result_list[0], key=lambda x: x["score"])
-                fallacy_name = best_match.get("label", "None")
+        content = response.choices[0].message.content
+        result = parse_fallacy_response(content)
 
-                return {
-                    "has_fallacy": True,
-                    "fallacy_type": fallacy_name
-                    if is_valid_fallacy_type(fallacy_name)
-                    else "Unknown",
-                    "confidence": best_match.get("score", 0.0),
-                    "explanation": f"Detected: {fallacy_name}",
-                    "quote": text[:100],
-                }
-        else:
-            logger.error(f"API Error: {response.status_code} - {response.text}")
+        if result:
+            confidence = result.get("confidence", 0.0)
+            result["confidence_level"] = get_confidence_level(confidence)
+
+            if result.get("has_fallacy") and not is_valid_fallacy_type(
+                result.get("fallacy_type", "")
+            ):
+                result["has_fallacy"] = False
+                result["fallacy_type"] = "None"
+            return result
 
     except Exception as e:
         logger.error(f"LLM request failed: {e}")
