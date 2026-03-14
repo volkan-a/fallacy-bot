@@ -36,7 +36,11 @@ Automated Reddit logical fallacy detection system that scrapes posts every 6 hou
 4. JSON data files are written atomically without corruption and committed to repository
 5. GitHub Pages auto-deploys when new data is available
 
-**Plans:** TBD
+**Plans:**
+- [ ] [01-automation-foundation-01-PLAN.md](.planning/phases/01-automation-foundation/01-automation-foundation-01-PLAN.md) — GitHub Actions workflow with concurrency, timeouts, and secure secrets
+- [ ] [01-automation-foundation-02-PLAN.md](.planning/phases/01-automation-foundation/01-automation-foundation-02-PLAN.md) — Reddit API client with rate limiting and content validation
+- [ ] [01-automation-foundation-03-PLAN.md](.planning/phases/01-automation-foundation/01-automation-foundation-03-PLAN.md) — Hugging Face LLM integration with retry and graceful degradation
+- [ ] [01-automation-foundation-04-PLAN.md](.planning/phases/01-automation-foundation/01-automation-foundation-04-PLAN.md) — JSON data manager with atomic writes and archive rotation
 
 ---
 
@@ -89,7 +93,7 @@ Automated Reddit logical fallacy detection system that scrapes posts every 6 hou
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Automation Foundation | 0/5 | Not started | - |
+| 1. Automation Foundation | 0/4 | Not started | - |
 | 2. Visual Generation & Frontend | 0/6 | Not started | - |
 | 3. Voting & Optimization | 0/5 | Not started | - |
 
