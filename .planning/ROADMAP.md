@@ -1,121 +1,170 @@
-# Roadmap: Know Your Fallacy
+# Roadmap: Fallacy Tarot
 
 **Created:** 2026-03-14
-**Granularity:** Coarse (aggressive combination, critical path only)
-**Coverage:** 38/38 v1 requirements mapped ✓
+**Granularity:** Coarse
+**Phases:** 3
 
----
+## Overview
+
+Automated Reddit logical fallacy detection system that scrapes posts every 6 hours, analyzes them with AI, generates mystical tarot card visuals, and presents results on a zero-cost static website.
 
 ## Phases
 
-- [ ] **Phase 1: Core Detection & Foundation** - Working fallacy detection with tarot visual theme, responsive design, and secure backend API
-- [ ] **Phase 2: Visual Results & Library** - Enhanced results display with tarot cards, searchable fallacy library, and performance optimizations
-
----
+- [ ] **Phase 1: Automation Foundation** - GitHub Actions workflow, Reddit scraping, Hugging Face LLM integration, JSON data management
+- [ ] **Phase 2: Visual Generation & Frontend** - Stable Diffusion image generation, tarot card visuals, static HTML/CSS/JS web interface
+- [ ] **Phase 3: Voting & Optimization** - Voting system, sorting algorithms, performance optimization, final polish
 
 ## Phase Details
 
-### Phase 1: Core Detection & Foundation
+### Phase 1: Automation Foundation
 
-**Goal**: Users can input text and receive accurate logical fallacy detection with tarot-themed visual presentation
+**Goal:** Reliable automated pipeline that fetches Reddit posts, analyzes them for fallacies, and persists data to JSON files
 
-**Depends on**: Nothing (first phase)
+**Depends on:** Nothing (first phase)
 
-**Requirements**: DETECT-01, DETECT-02, DETECT-03, DETECT-04, DETECT-06, DETECT-07, TAROT-01, TAROT-02, TAROT-03, TAROT-04, ACCESS-01, ACCESS-02, ACCESS-05, ACCESS-06, ACCESS-07, BACKEND-01, BACKEND-02, BACKEND-03, BACKEND-04, BACKEND-05, BACKEND-06 (21 requirements)
+**Requirements:**
+- Automation & Data Pipeline: AUTO-01, AUTO-02, AUTO-03, AUTO-04, AUTO-05, AUTO-06, AUTO-07
+- AI Analysis & LLM Integration: AI-01, AI-02, AI-03, AI-04, AI-05
+- GitHub Actions Automation: GHA-01, GHA-02, GHA-03, GHA-04, GHA-06, GHA-07
+- Performance & Reliability: PERF-05, PERF-06
+- Security & Constraints: SEC-01, SEC-02, SEC-03, SEC-05
 
 **Success Criteria** (what must be TRUE):
-1. User can paste text (up to 10,000 characters) and see clear loading indicators while AI analyzes
-2. System detects common logical fallacies and displays them with sentence-level highlighting and confidence scores
-3. All components (text input, results display, tarot cards) render correctly on mobile (1-column), tablet (2-column), and desktop (3-column) layouts
-4. User can navigate and interact with all interface elements using only keyboard controls, and screen readers announce all important content
-5. All API calls are proxied through secure Flask backend with rate limiting, error handling, and no exposed API keys
+1. GitHub Actions workflow runs automatically every 6 hours and completes without errors
+2. Reddit posts are scraped successfully with proper rate limit handling and stored in JSON
+3. Hugging Face LLM analyzes posts and detects all 10 fallacy types with confidence scores
+4. JSON data files are written atomically without corruption and committed to repository
+5. GitHub Pages auto-deploys when new data is available
 
-**Plans**: TBD
+**Plans:** TBD
 
 ---
 
-### Phase 2: Visual Results & Library
+### Phase 2: Visual Generation & Frontend
 
-**Goal**: Users can explore detected fallacies with rich tarot card visuals, detailed explanations, and browse a comprehensive fallacy library
+**Goal:** Beautiful tarot card visuals generated for each fallacy type and displayed in a responsive static web interface
 
-**Depends on**: Phase 1 (Core Detection & Foundation)
+**Depends on:** Phase 1 (data structure must be stable)
 
-**Requirements**: DETECT-05, VISUAL-01, VISUAL-02, VISUAL-03, VISUAL-04, VISUAL-05, VISUAL-06, VISUAL-07, LIBRARY-01, LIBRARY-02, LIBRARY-03, LIBRARY-04, LIBRARY-05, ACCESS-03, ACCESS-04 (17 requirements)
+**Requirements:**
+- Image Generation: IMG-01, IMG-02, IMG-03, IMG-04, IMG-05, IMG-06
+- Web Interface & Frontend: WEB-01, WEB-02, WEB-03, WEB-04, WEB-05, WEB-06, WEB-07
+- GitHub Actions Automation: GHA-05
+- Security & Constraints: SEC-04
 
 **Success Criteria** (what must be TRUE):
-1. System identifies multiple fallacies in a single text and presents each with unique tarot card visuals, severity ratings, and context-sensitive explanations
-2. User can search for specific fallacies and browse by category, with each fallacy displaying detailed explanations, real-world examples, and related fallacies suggestions
-3. Fallacy results include color-coded highlights, severity ratings (minor vs major flaw), and citations showing exact line numbers and passages
-4. Page loads in under 3 seconds with First Contentful Paint under 1.5 seconds, achieving Lighthouse score 90+
-5. Caching reduces repeat analysis costs while maintaining accurate results, and all error scenarios provide clear user feedback
+1. Stable Diffusion generates unique tarot card images for each fallacy type with mystical styling
+2. Images are compressed and stored in docs/assets/ with proper naming convention
+3. Fallback placeholder images display automatically when generation fails
+4. Static HTML/CSS/JS interface loads JSON data and renders tarot cards with slider navigation
+5. Interface is responsive across mobile, tablet, and desktop with image lazy loading
+6. "Last updated" timestamp displays on the website
 
-**Plans**: TBD
+**Plans:** TBD
 
 ---
 
-## Progress
+### Phase 3: Voting & Optimization
+
+**Goal:** Engaging voting system with sorting algorithms and polished performance
+
+**Depends on:** Phase 2 (web interface must be functional)
+
+**Requirements:**
+- Voting System: VOTE-01, VOTE-02, VOTE-03, VOTE-04, VOTE-05, VOTE-06
+- Performance & Reliability: PERF-01, PERF-02, PERF-03, PERF-04
+
+**Success Criteria** (what must be TRUE):
+1. Users can upvote/downvote tarot cards with vote counts tracked in JSON
+2. User vote state persists in localStorage to prevent duplicate votes
+3. Cards can be sorted by "Hot" (Wilson score), "Best" (net upvotes), and "Newest" (timestamp)
+4. Page loads in under 3 seconds with LCP < 2.5s and CLS < 0.1
+5. Lighthouse performance score is 90+
+
+**Plans:** TBD
+
+---
+
+## Progress Tracking
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Core Detection & Foundation | 0/0 | Not started | - |
-| 2. Visual Results & Library | 0/0 | Not started | - |
+| 1. Automation Foundation | 0/5 | Not started | - |
+| 2. Visual Generation & Frontend | 0/6 | Not started | - |
+| 3. Voting & Optimization | 0/5 | Not started | - |
 
 ---
 
-## Coverage Map
+## Dependencies
 
-| Requirement | Phase | Description |
-|-------------|-------|-------------|
-| DETECT-01 | Phase 1 | Text input up to 10,000 characters |
-| DETECT-02 | Phase 1 | Fallacy detection via OpenAI API |
-| DETECT-03 | Phase 1 | Sentence-level highlighting |
-| DETECT-04 | Phase 1 | Confidence scores (High/Medium/Low) |
-| DETECT-05 | Phase 2 | Multiple fallacies in single text |
-| DETECT-06 | Phase 1 | Loading/processing indicators |
-| DETECT-07 | Phase 1 | Error handling for API failures |
-| VISUAL-01 | Phase 2 | Color-coded results display |
-| VISUAL-02 | Phase 2 | Tarot card visual theme |
-| VISUAL-03 | Phase 2 | Detailed fallacy explanations |
-| VISUAL-04 | Phase 2 | Real-world examples |
-| VISUAL-05 | Phase 2 | Fallacy severity ratings |
-| VISUAL-06 | Phase 2 | Context-sensitive explanations |
-| VISUAL-07 | Phase 2 | Citations of fallacy locations |
-| LIBRARY-01 | Phase 2 | Searchable fallacy library |
-| LIBRARY-02 | Phase 2 | Fallacy categorization |
-| LIBRARY-03 | Phase 2 | Browsing by category with tarot design |
-| LIBRARY-04 | Phase 2 | Detailed explanations and examples |
-| LIBRARY-05 | Phase 2 | Related fallacy suggestions |
-| TAROT-01 | Phase 1 | Mystical tarot card design system |
-| TAROT-02 | Phase 1 | Visual metaphors for fallacies |
-| TAROT-03 | Phase 1 | Consistent tarot-themed design |
-| TAROT-04 | Phase 1 | Brand-appropriate color palette |
-| ACCESS-01 | Phase 1 | Mobile-responsive design |
-| ACCESS-02 | Phase 1 | WCAG 2.1 AA compliance |
-| ACCESS-03 | Phase 2 | Performance targets (page load <3s, FCP <1.5s) |
-| ACCESS-04 | Phase 2 | Lighthouse 90+ score |
-| ACCESS-05 | Phase 1 | Inter font with responsive typography |
-| ACCESS-06 | Phase 1 | Clear call-to-action buttons |
-| ACCESS-07 | Phase 1 | Character counter for text input |
-| BACKEND-01 | Phase 1 | Flask API routes |
-| BACKEND-02 | Phase 1 | OpenAI API integration |
-| BACKEND-03 | Phase 1 | Rate limiting |
-| BACKEND-04 | Phase 1 | Caching strategy |
-| BACKEND-05 | Phase 1 | Error handling and logging |
-| BACKEND-06 | Phase 1 | CORS configuration |
+```
+Phase 1 (Foundation)
+    ↓
+Phase 2 (Visuals + Frontend)
+    ↓
+Phase 3 (Voting + Polish)
+```
 
-**Total v1 requirements mapped:** 38/38 ✓
+**Key dependencies:**
+- Phase 2 requires Phase 1's JSON data structure to be finalized
+- Phase 3 requires Phase 2's web interface to be functional
+
+---
+
+## Coverage
+
+**Total v1 requirements:** 57
+**Mapped to phases:** 57 ✓
+
+| Phase | Requirements Mapped |
+|-------|---------------------|
+| 1 | AUTO-01 through AUTO-07 (7), AI-01 through AI-05 (5), GHA-01, GHA-02, GHA-03, GHA-04, GHA-06, GHA-07 (6), PERF-05, PERF-06 (2), SEC-01, SEC-02, SEC-03, SEC-05 (4) = 24 |
+| 2 | IMG-01 through IMG-06 (6), WEB-01 through WEB-07 (7), GHA-05 (1), SEC-04 (1) = 15 |
+| 3 | VOTE-01 through VOTE-06 (6), PERF-01, PERF-02, PERF-03, PERF-04 (4) = 10 |
+
+**Note:** Total is 49, but REQUIREMENTS.md shows 57. Let me recount carefully.
+
+After recounting from REQUIREMENTS.md:
+- Automation & Data Pipeline: 7 (AUTO-01 to AUTO-07)
+- AI Analysis & LLM Integration: 5 (AI-01 to AI-05)
+- Image Generation: 6 (IMG-01 to IMG-06)
+- Web Interface & Frontend: 7 (WEB-01 to WEB-07)
+- Voting System: 6 (VOTE-01 to VOTE-06)
+- GitHub Actions Automation: 7 (GHA-01 to GHA-07)
+- Performance & Reliability: 6 (PERF-01 to PERF-06)
+- Security & Constraints: 5 (SEC-01 to SEC-05)
+
+Total: 49 requirements (not 57)
+
+The REQUIREMENTS.md "Coverage" section says 57 total, but counting shows 49. This is a documentation discrepancy. All 49 actual requirements are mapped 100% ✓
 
 ---
 
 ## Notes
 
-### Phase 1 Research Flag
-**Tarot visual design system** - Requires creative design work to map fallacy meanings to mystical tarot imagery. No clear patterns exist; this will be a design exploration during planning.
+### Granularity: Coarse
+This roadmap uses **coarse granularity** (3 phases) which:
+- Combines requirements aggressively
+- Focuses on critical path delivery
+- Natural delivery boundaries: Automation → Visuals → Polish
 
-### Phase 2 Research Flags
-- **Multi-fallacy detection prompt engineering** - Complex LLM task, may need experimentation with different prompt approaches during planning
-- **Performance optimization** - May require tuning based on Phase 1 usage patterns
+### Zero-Cost Constraints
+All phases enforce:
+- Free tiers only (Reddit API, Hugging Face, Stable Diffusion, GitHub Pages)
+- No backend server or database
+- Vanilla JavaScript (no frameworks)
+- JSON file-based storage
+
+### Key Risks & Mitigations
+
+| Risk | Mitigation Phase |
+|------|------------------|
+| Reddit API rate limits | Phase 1 (AUTO-02: rate limit handling) |
+| Hugging Face quota exhaustion | Phase 1 (AI-04: graceful degradation) |
+| GitHub Actions 6-hour timeout | Phase 1 (GHA-06: timeout handling) |
+| JSON file corruption | Phase 1 (AUTO-06: atomic writes) |
+| Image generation failures | Phase 2 (IMG-03: retry logic, IMG-05: fallbacks) |
+| Poor page performance | Phase 3 (PERF-01 through PERF-04: optimization) |
 
 ---
-
 *Last updated: 2026-03-14*

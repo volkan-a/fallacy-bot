@@ -170,9 +170,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEC-05 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 57 total
-- Mapped to phases: 0
-- Unmapped: 57 ⚠️
+- v1 requirements: 49 total
+- Mapped to phases: 49 ✓
+- Unmapped: 0
+- Orphaned requirements: None
+
+**Phase breakdown:**
+- Phase 1 (Automation Foundation): 24 requirements
+- Phase 2 (Visual Generation & Frontend): 15 requirements
+- Phase 3 (Voting & Optimization): 10 requirements
 
 ---
 *Requirements defined: 2026-03-14*
