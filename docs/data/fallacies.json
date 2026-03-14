@@ -1,44 +1,9 @@
-[
-  {
-    "id": "demo_fallacy_001",
-    "timestamp": 1735689600,
-    "date": "2025-01-01 12:00",
-    "original_post": {
-      "title": "Örnek Tartışma",
-      "text": "Herkes bu filmi beğendi, o halde bu film kesinlikle en iyi filmdir.",
-      "url": "#",
-      "author": "demo_user",
-      "score": 150
-    },
-    "fallacy": {
-      "type": "Hasty Generalization",
-      "confidence": 0.85,
-      "explanation": "Birkaç kişinin görüşünden yola çıkarak genel bir sonuç çıkarma hatası. Sadece bazı insanlar filmi beğendi diye bunun en iyi film olduğu sonucu çıkarılamaz.",
-      "quote": "Herkes bu filmi beğendi, o halde bu film kesinlikle en iyi filmdir."
-    },
-    "image": "assets/demo_tarot.png",
-    "votes": {"up": 12, "down": 2},
-    "category": "best"
-  },
-  {
-    "id": "demo_fallacy_002",
-    "timestamp": 1735776000,
-    "date": "2025-01-02 12:00",
-    "original_post": {
-      "title": "Politika Eleştirisi",
-      "text": "Bu politikayı sadece cahil insanlar destekler, sen de destekliyorsun demek ki cahilsin.",
-      "url": "#",
-      "author": "logic_master",
-      "score": 89
-    },
-    "fallacy": {
-      "type": "Ad Hominem",
-      "confidence": 0.92,
-      "explanation": "Kişinin argümanına değil, kişisel özelliklerine saldırma hatası. Politikayı desteklemenin zeka ile ilgisi yoktur, argümanın kendisi değerlendirilmelidir.",
-      "quote": "Bu politikayı sadece cahil insanlar destekler, sen de destekliyorsun demek ki cahilsin."
-    },
-    "image": "assets/placeholders/fallback_card.svg",
-    "votes": {"up": 8, "down": 1},
-    "category": "hot"
+{
+  "entries": [],
+  "metadata": {
+    "version": "1.0",
+    "created_at": "2026-03-14T00:00:00",
+    "last_updated": "2026-03-14T00:00:00",
+    "total_entries": 0
   }
-]
+}

@@ -10,6 +10,10 @@ import json
 import logging
 from datetime import datetime
 
+# Add scripts directory to path so we can import from it when run from root
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -21,15 +25,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import client modules (these will be created in subsequent plans)
+# Import client modules
 try:
-    from reddit_client import fetch_reddit_posts
-    from hf_client import analyze_fallacy
-    from data_manager import DataManager
+    from scripts.reddit_client import fetch_reddit_posts
+    from scripts.hf_client import analyze_fallacy
+    from scripts.data_manager import DataManager
 except ImportError as e:
-    logger.error(f"Failed to import client modules: {e}")
-    logger.info("Client modules will be created in subsequent plans")
-    sys.exit(0)
+    try:
+        # Try local imports if running from inside scripts/
+        from reddit_client import fetch_reddit_posts
+        from hf_client import analyze_fallacy
+        from data_manager import DataManager
+    except ImportError as e2:
+        logger.error(f"Failed to import client modules: {e} / {e2}")
+        logger.info("Please ensure all client modules are implemented")
+        sys.exit(1)
 
 
 def main():
@@ -58,8 +68,25 @@ def main():
                 analysis = analyze_fallacy(post["content"])
 
                 if analysis and analysis.get("has_fallacy"):
-                    post["analysis"] = analysis
-                    analyzed_posts.append(post)
+                    # Format entry according to AUTO-05 requirements
+                    entry = {
+                        "post_id": post["id"],
+                        "title": post["title"],
+                        "content": post["content"],
+                        "source_url": post["url"],
+                        "author": post["author"],
+                        "reddit_score": post["score"],
+                        "subreddit": post["subreddit"],
+                        "fallacy_type": analysis["fallacy_type"],
+                        "confidence_score": analysis["confidence"],
+                        "confidence_level": analysis.get("confidence_level", "Medium"),
+                        "explanation": analysis["explanation"],
+                        "quote": analysis["quote"],
+                        "timestamp": datetime.now().isoformat(),
+                        "upvotes": 0,
+                        "downvotes": 0,
+                    }
+                    analyzed_posts.append(entry)
                     logger.info(
                         f"  → Detected: {analysis['fallacy_type']} (confidence: {analysis['confidence']:.2f})"
                     )
@@ -67,7 +94,7 @@ def main():
                     logger.info(f"  → No fallacy detected")
 
             except Exception as e:
-                logger.error(f"Error analyzing post {post['id']}: {e}")
+                logger.error(f"Error analyzing post {post['id']}: {e}", exc_info=True)
                 # Continue with next post (graceful degradation)
                 continue
 
@@ -79,14 +106,16 @@ def main():
             logger.info("No fallacies detected in this batch")
             return
 
-        # Step 3: Save data
+        # Step 3: Save data using DataManager
         logger.info("Step 3: Saving analyzed data...")
         data_manager = DataManager()
         data_manager.add_entries(analyzed_posts)
-        logger.info("Data saved successfully")
 
+        # Log summary
         logger.info("=" * 60)
         logger.info("✅ Automation completed successfully")
+        logger.info(f"   New entries: {len(analyzed_posts)}")
+        logger.info(f"   Total entries: {len(data_manager.get_entries())}")
         logger.info("=" * 60)
 
     except Exception as e:
@@ -95,4 +124,6 @@ def main():
 
 
 if __name__ == "__main__":
+    # Ensure data directory exists for logs
+    os.makedirs("data", exist_ok=True)
     main()
