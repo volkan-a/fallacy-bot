@@ -79,14 +79,9 @@ jobs:
             echo "No changes to commit"
           else
             echo "Changes detected, committing and pushing..."
-
-            # Conflict resolution: pull first, then commit
-            if git pull --rebase origin/main 2>&1 | grep -q "up-to-date"; then
-              echo "Already up to date, no pull needed"
-            else
-              echo "Pulling with conflict resolution..."
-              git pull --rebase origin/main || git pull --strategy-option=theirs origin/main
-            fi
+            git commit -m "Auto-update: New fallacy cards generated [skip ci]"
+            git push origin main
+          fi
 
             git commit -m "Auto-update: New fallacy cards generated [skip ci]"
             git push origin main
