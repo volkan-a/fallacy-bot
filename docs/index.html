@@ -299,12 +299,19 @@
 
             const item = filteredFallacies[currentIndex];
             const voteScore = item.votes.up - item.votes.down;
+            
+            // Görsel URL'si - eğer yoksa fallback kullan
+            let imageUrl = item.image;
+            if (!imageUrl || imageUrl.trim() === '') {
+                imageUrl = 'assets/fallback_card.svg';
+            }
 
             container.innerHTML = `
                 <div class="card">
                     <div class="tarot-display">
                         <div class="tarot-image">
-                            <img src="${item.image}" alt="${item.fallacy.type} Tarot Kartı">
+                            <img src="${imageUrl}" alt="${item.fallacy.type} Tarot Kartı" 
+                                 onerror="this.onerror=null; this.src='assets/fallback_card.svg';">
                         </div>
                         <div class="fallacy-info">
                             <h2 class="fallacy-title">${item.fallacy.type}</h2>

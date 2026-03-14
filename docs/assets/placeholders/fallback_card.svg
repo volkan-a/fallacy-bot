@@ -1,0 +1,49 @@
+<svg width="400" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mysticGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0b2e;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4a1c6e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d1b4e;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="600" fill="url(#mysticGrad)" rx="20" ry="20"/>
+  
+  <!-- Border -->
+  <rect x="10" y="10" width="380" height="580" fill="none" stroke="#ffd700" stroke-width="3" rx="15" ry="15" filter="url(#glow)"/>
+  
+  <!-- Decorative corners -->
+  <circle cx="30" cy="30" r="8" fill="#ffd700" opacity="0.8"/>
+  <circle cx="370" cy="30" r="8" fill="#ffd700" opacity="0.8"/>
+  <circle cx="30" cy="570" r="8" fill="#ffd700" opacity="0.8"/>
+  <circle cx="370" cy="570" r="8" fill="#ffd700" opacity="0.8"/>
+  
+  <!-- Central symbol (mystic eye) -->
+  <ellipse cx="200" cy="250" rx="60" ry="40" fill="none" stroke="#ffd700" stroke-width="2" opacity="0.6"/>
+  <circle cx="200" cy="250" r="25" fill="#ffd700" opacity="0.3"/>
+  <circle cx="200" cy="250" r="10" fill="#ffd700" opacity="0.8"/>
+  
+  <!-- Rays -->
+  <line x1="200" y1="200" x2="200" y2="150" stroke="#ffd700" stroke-width="2" opacity="0.5"/>
+  <line x1="200" y1="300" x2="200" y2="350" stroke="#ffd700" stroke-width="2" opacity="0.5"/>
+  <line x1="150" y1="250" x2="100" y2="250" stroke="#ffd700" stroke-width="2" opacity="0.5"/>
+  <line x1="250" y1="250" x2="300" y2="250" stroke="#ffd700" stroke-width="2" opacity="0.5"/>
+  
+  <!-- Text -->
+  <text x="200" y="450" font-family="Georgia, serif" font-size="24" fill="#ffd700" text-anchor="middle" font-weight="bold">MYSTIC CARD</text>
+  <text x="200" y="480" font-family="Georgia, serif" font-size="14" fill="#e0e0e0" text-anchor="middle" opacity="0.8">Awaiting Vision...</text>
+  
+  <!-- Bottom decoration -->
+  <path d="M 150 520 Q 200 540 250 520" fill="none" stroke="#ffd700" stroke-width="2" opacity="0.6"/>
+  <circle cx="150" cy="520" r="4" fill="#ffd700" opacity="0.6"/>
+  <circle cx="200" cy="530" r="4" fill="#ffd700" opacity="0.6"/>
+  <circle cx="250" cy="520" r="4" fill="#ffd700" opacity="0.6"/>
+</svg>
