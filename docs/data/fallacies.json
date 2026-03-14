@@ -1,0 +1,23 @@
+[
+  {
+    "id": "demo_fallacy_001",
+    "timestamp": 1735689600,
+    "date": "2025-01-01 12:00",
+    "original_post": {
+      "title": "Örnek Tartışma",
+      "text": "Herkes bu filmi beğendi, o halde bu film kesinlikle en iyi filmdir.",
+      "url": "#",
+      "author": "demo_user",
+      "score": 150
+    },
+    "fallacy": {
+      "type": "Hasty Generalization",
+      "confidence": 0.85,
+      "explanation": "Birkaç kişinin görüşünden yola çıkarak genel bir sonuç çıkarma hatası. Sadece bazı insanlar filmi beğendi diye bunun en iyi film olduğu sonucu çıkarılamaz.",
+      "quote": "Herkes bu filmi beğendi, o halde bu film kesinlikle en iyi filmdir."
+    },
+    "image": "assets/demo_tarot.png",
+    "votes": {"up": 12, "down": 2},
+    "category": "best"
+  }
+]
