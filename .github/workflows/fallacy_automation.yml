@@ -1,69 +1,19 @@
 name: Fallacy Tarot Automation
 
 on:
-  workflow_dispatch: # Manuel olarak da tetiklenebilir
-  push:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - 'requirements.txt'
+  schedule:
+    - cron: '0 */6 * * *'  # Her 6 saatte bir çalışır
+  workflow_dispatch:      # Manuel olarak da tetiklenebilir
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
-  analyze-and-deploy:
+  fetch-and-analyze:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Fetch Reddit Data (Primary Source)
-        id: fetch_reddit
-        run: |
-          mkdir -p data
-          USER_AGENT="FallacyTarotBot/1.0 (by /u/fallacy_tarot)"
-          SUBREDDITS=("worldnews" "fallacy" "philosophy" "funny" "science" "todayilearned" "changemyview")
-          
-          echo "Fetching Reddit data..."
-          > data/raw_reddit.jsonl
-          
-          for sub in "${SUBREDDITS[@]}"; do
-            echo "Trying r/${sub}..."
-            URL="https://www.reddit.com/r/${sub}/top.json?t=week&limit=15"
-            
-            if wget --timeout=10 --tries=2 -U "$USER_AGENT" -O temp_fetch.json "$URL" 2>/dev/null; then
-              echo "Success fetching r/${sub}"
-              python3 -c "
-import json, sys
-try:
-    with open('temp_fetch.json', 'r') as f:
-        data = json.load(f)
-    posts = data.get('data', {}).get('children', [])
-    result = {'subreddit': '${sub}', 'posts': posts}
-    print(json.dumps(result))
-except Exception as e:
-    print(json.dumps({'subreddit': '${sub}', 'posts': [], 'error': str(e)}), file=sys.stderr)
-    sys.exit(1)
-" >> data/raw_reddit.jsonl || true
-              rm -f temp_fetch.json
-              sleep 2
-            else
-              echo "Failed to fetch r/${sub}"
-            fi
-          done
-
-          if [ -s data/raw_reddit.jsonl ]; then
-            echo "Reddit data fetched successfully."
-          else
-            echo "No Reddit data fetched. Python script will use mock data."
-            touch data/raw_reddit.jsonl
-          fi
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -74,28 +24,39 @@ except Exception as e:
         run: |
           pip install requests pillow huggingface_hub python-dotenv
 
-      - name: Run Fallacy Analysis and Image Generation
+      - name: Fetch Reddit Data (wget only)
+        run: |
+          mkdir -p data
+          USER_AGENT="FallacyTarotBot/1.0 (by /u/fallacy_tarot)"
+          SUBREDDITS=("worldnews" "fallacy" "philosophy" "funny" "science" "todayilearned" "changemyview")
+          
+          echo "Fetching Reddit data via wget..."
+          > data/raw_reddit.jsonl
+          
+          for sub in "${SUBREDDITS[@]}"; do
+            echo "Trying r/${sub}..."
+            URL="https://www.reddit.com/r/${sub}/top.json?t=week&limit=15"
+            
+            if wget --timeout=10 --tries=2 -U "$USER_AGENT" -O "data/reddit_${sub}.json" "$URL" 2>/dev/null; then
+              echo "Success fetching r/${sub}"
+              sleep 2
+            else
+              echo "Failed to fetch r/${sub}, will rely on fallback in Python"
+            fi
+          done
+          
+          echo "Raw JSON files saved in data/ directory."
+
+      - name: Run Fallacy Analysis & Generation
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          python src/fallacy_analyzer.py
+          python .github/workflows/run_fallacy_analysis.py
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './docs'
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Commit and Push Incremental Data
+      - name: Commit and Push Results
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/incremental_fallacies.json output/tarot_cards/ || true
-          git commit -m "Update incremental fallacies and new tarot cards [skip ci]" || echo "No changes to commit"
+          git add data/ generated_cards/ || true
+          git diff --staged --quiet || git commit -m "Auto-update: New fallacy cards generated [skip ci]"
           git push
