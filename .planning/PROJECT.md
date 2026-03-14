@@ -1,12 +1,12 @@
-# Know Your Fallacy
+# Fallacy Tarot
 
 ## What This Is
 
-An AI-powered logical fallacy detection system that analyzes text input to identify common reasoning errors and provide visual explanations. Users can paste any text and receive detailed analysis of fallacies detected, with educational explanations and visual representations using a mystical tarot card theme.
+Fully automated logical fallacy detection system that scrapes popular posts from Reddit, analyzes them for logical fallacies using Hugging Face LLM, generates mystical tarot card visuals with Stable Diffusion XL, and presents results in a beautiful web interface updated every 6 hours via GitHub Actions. Completely free technologies hosted on GitHub Pages.
 
 ## Core Value
 
-Accurate and accessible detection of logical fallacies to improve critical thinking skills.
+Automatically discover and beautifully present logical fallacies from Reddit discussions to make critical thinking engaging and accessible.
 
 ## Requirements
 
@@ -16,59 +16,75 @@ Accurate and accessible detection of logical fallacies to improve critical think
 
 ### Active
 
-- [ ] User can input text for analysis
-- [ ] System can detect logical fallacies using AI
-- [ ] Results displayed in modern, responsive web interface
-- [ ] Visual representations (tarot card theme) for each fallacy
-- [ ] Educational explanations for each detected fallacy
-- [ ] Category-based browsing of fallacies
-- [ ] Mobile-responsive design
-- [ ] Fast and intuitive user experience
+- [ ] Automated Reddit scraping of popular posts
+- [ ] Hugging Face Mistral-7B-Instruct for fallacy detection
+- [ ] Stable Diffusion XL for tarot card visual generation
+- [ ] Tarot-themed web interface with slider navigation
+- [ ] Voting system (upvote/downvote) with "Hot", "Best", "Newest" sorting
+- [ ] GitHub Actions automation running every 6 hours
+- [ ] Zero-cost deployment (free technologies only)
+- [ ] GitHub Pages hosting for static web interface
+- [ ] Detect all 10 fallacy types (Ad Hominem, Straw Man, Appeal to Authority, False Dilemma, Slippery Slope, Circular Reasoning, Hasty Generalization, Red Herring, Tu Quoque, Appeal to Emotion)
+- [ ] Data persistence via JSON files (fallacies.json, archive.json)
+- [ ] Placeholder tarot cards when image generation fails
 
 ### Out of Scope
 
-- [Real-time Reddit analysis] — Initial focus on user-provided text input, automated Reddit scraping deferred to v2
-- [User accounts and authentication] — Anonymous usage for v1, personal accounts and history deferred
-- [Social features (voting, sharing)] — Core detection functionality prioritized, social engagement deferred
-- [Multi-language support] — English-only for v1, internationalization in v2+
+- [User accounts and authentication] — Public read-only site, no user data collection needed
+- [Backend server] — Static GitHub Pages hosting only
+- [Database] — JSON file-based data storage sufficient
+- [Real-time Reddit scraping] — Scheduled batch processing every 6 hours
+- [Paid APIs or services] — Zero-cost requirement enforced
+- [Mobile apps] — Web-only responsive interface
+- [Multi-language support] — English-only for v1
 
 ## Context
 
 **Current State:**
-- Initial development phase complete (React frontend, Flask backend, OpenAI API integration)
-- Components implemented: Header, HeroSection, ResultsSection, FallacyCategories, Footer
-- Responsive design implemented with Tailwind CSS
-- Production deployed
+- GitHub Actions workflow exists (.github/workflows/fallacy_automation.yml)
+- Fallacy analyzer script exists (scripts/fallacy_analyzer.py)
+- Static HTML interface exists (docs/index.html)
+- Data directories prepared (docs/data/, docs/assets/)
+- Design assets available (logo_design.png, website_wireframe.png)
 
 **Technical Foundation:**
-- Backend: Flask with Python, OpenAI API integration for fallacy detection
-- Frontend: React.js with vanilla JavaScript components
-- Design: Inter font, tarot-themed mystical visual design
-- Performance targets: Page load <3s, FCP <1.5s, Lighthouse 90+
-- Accessibility: WCAG 2.1 AA compliant
+- Data source: Reddit API (free)
+- LLM analysis: Hugging Face Mistral-7B-Instruct
+- Visual generation: Stable Diffusion XL
+- Automation: GitHub Actions (runs every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC)
+- Hosting: GitHub Pages
+- Frontend: Vanilla HTML/CSS/JavaScript (no frameworks)
+- Data storage: JSON files (fallacies.json, archive.json)
 
 **Design System:**
-- Color palette: Main Blue (#4A90A4), Dark Blue (#2C5F7A), Light Gray (#F8F9FA), White (#FFFFFF)
-- Typography: Inter sans-serif, responsive sizing
-- Layout: 3-column desktop, 2-column tablet, 1-column mobile
+- Tarot-themed mystical visual design
+- Slider navigation for browsing results
+- Reddit-style upvote/downvote voting
+- Sorting: "Hot", "Best", "Newest"
+- Color palette: Mystical blues, purples, gold accents (from logo_design.png)
 
 ## Constraints
 
-- **Tech Stack**: React.js, Flask, Python, Tailwind CSS, OpenAI API — existing codebase uses these
-- **Performance**: Page load <3 seconds, FCP <1.5 seconds, Lighthouse 90+ score
-- **Accessibility**: WCAG 2.1 AA standards, keyboard navigation, screen reader compatibility
-- **Design**: Must use established color palette (#4A90A4 main), Inter font, tarot theme
-- **Browser Support**: Modern browsers only (Chrome, Firefox, Safari, Edge recent versions)
+- **Cost**: Zero-cost requirement — use only free technologies (Reddit API, Hugging Face free tier, Stable Diffusion free tier, GitHub Pages free tier)
+- **Automation**: Must run automatically every 6 hours via GitHub Actions
+- **Hosting**: GitHub Pages only (static HTML, no backend server)
+- **Frontend**: Vanilla JavaScript only (no frameworks like React)
+- **Data**: JSON file-based storage (no databases)
+- **LLM**: Hugging Face Mistral-7B-Instruct (free tier)
+- **Image Generation**: Stable Diffusion XL (free tier)
+- **Fallacy Types**: Must detect all 10 specific fallacy types listed in README
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| React.js frontend | Modern component-based architecture, existing codebase built with it | ✓ Good |
-| Flask backend with Python | Simple, lightweight, integrates well with AI APIs | ✓ Good |
-| OpenAI API for fallacy detection | Most accurate and comprehensive fallacy detection capabilities | — Pending |
-| Tarot card visual theme | Unique, engaging user experience that differentiates from plain text tools | — Pending |
-| Tailwind CSS for styling | Rapid UI development, responsive design, existing implementation | ✓ Good |
+| Scheduled 6-hour automation | Reddit API rate limits, avoid spamming, balance freshness with cost | — Pending |
+| Hugging Face over OpenAI | Zero-cost requirement, Mistral-7B-Instruct sufficient for fallacy detection | — Pending |
+| Stable Diffusion XL | Free tier available, high-quality image generation suitable for tarot card visuals | — Pending |
+| GitHub Pages static hosting | Zero-cost, automatic deployment, integrates with GitHub Actions workflow | — Pending |
+| Vanilla JavaScript over frameworks | Simpler maintenance, faster page loads, meets zero-cost requirement | — Pending |
+| JSON file storage | No database needed, simple data persistence, GitHub Pages compatible | — Pending |
+| Slider navigation | Unique UX for browsing tarot cards, aligns with mystical theme | — Pending |
 
 ---
 *Last updated: 2026-03-14 after initialization*
