@@ -64,7 +64,11 @@ Automated Reddit logical fallacy detection system that scrapes posts every 6 hou
 5. Interface is responsive across mobile, tablet, and desktop with image lazy loading
 6. "Last updated" timestamp displays on the website
 
-**Plans:** TBD
+**Plans:**
+- [ ] [02-visual-generation-frontend-01-PLAN.md](.planning/phases/02-visual-generation-frontend/02-visual-generation-frontend-01-PLAN.md) — Image generation script using SDXL
+- [ ] [02-visual-generation-frontend-02-PLAN.md](.planning/phases/02-visual-generation-frontend/02-visual-generation-frontend-02-PLAN.md) — Image optimization and fallback placeholder logic
+- [ ] [02-visual-generation-frontend-03-PLAN.md](.planning/phases/02-visual-generation-frontend/02-visual-generation-frontend-03-PLAN.md) — Refactored English HTML/CSS UI and responsive slider component
+- [ ] [02-visual-generation-frontend-04-PLAN.md](.planning/phases/02-visual-generation-frontend/02-visual-generation-frontend-04-PLAN.md) — Vanilla JS data mapping and error states
 
 ---
 
@@ -93,8 +97,8 @@ Automated Reddit logical fallacy detection system that scrapes posts every 6 hou
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Automation Foundation | 0/4 | Not started | - |
-| 2. Visual Generation & Frontend | 0/6 | Not started | - |
+| 1. Automation Foundation | 0/4 | In Progress | - |
+| 2. Visual Generation & Frontend | 0/4 | Planned | - |
 | 3. Voting & Optimization | 0/5 | Not started | - |
 
 ---
