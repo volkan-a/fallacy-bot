@@ -27,14 +27,11 @@ jobs:
         id: fetch_reddit
         run: |
           mkdir -p data
-          # User-Agent zorunludur, aksi takdirde Reddit 403 döner
           USER_AGENT="FallacyTarotBot/1.0 (by /u/fallacy_tarot)"
-          
-          # Subreddit listesi (worldnews başta)
           SUBREDDITS=("worldnews" "fallacy" "philosophy" "funny" "science" "todayilearned" "changemyview")
           
           echo "Fetching Reddit data..."
-          > data/raw_reddit.jsonl  # JSON Lines formatında topluyoruz
+          > data/raw_reddit.jsonl
           
           for sub in "${SUBREDDITS[@]}"; do
             echo "Trying r/${sub}..."
@@ -42,10 +39,8 @@ jobs:
             
             if wget --timeout=10 --tries=2 -U "$USER_AGENT" -O temp_fetch.json "$URL" 2>/dev/null; then
               echo "Success fetching r/${sub}"
-              # Her subreddit verisini JSON Lines formatında ekle
-              python3 << EOF
-import json
-import sys
+              python3 -c "
+import json, sys
 try:
     with open('temp_fetch.json', 'r') as f:
         data = json.load(f)
@@ -55,26 +50,14 @@ try:
 except Exception as e:
     print(json.dumps({'subreddit': '${sub}', 'posts': [], 'error': str(e)}), file=sys.stderr)
     sys.exit(1)
-EOF
-              if [ $? -eq 0 ]; then
-                python3 << EOF >> data/raw_reddit.jsonl
-import json
-with open('temp_fetch.json', 'r') as f:
-    data = json.load(f)
-posts = data.get('data', {}).get('children', [])
-result = {'subreddit': '${sub}', 'posts': posts}
-print(json.dumps(result))
-EOF
-              fi
-              
-              rm temp_fetch.json
-              sleep 2 # Rate limit önlemi
+" >> data/raw_reddit.jsonl || true
+              rm -f temp_fetch.json
+              sleep 2
             else
               echo "Failed to fetch r/${sub}"
             fi
           done
 
-          # Eğer hiç veri çekilemediyse boş dosya kalacak, Python mock devreye sokacak
           if [ -s data/raw_reddit.jsonl ]; then
             echo "Reddit data fetched successfully."
           else
