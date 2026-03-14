@@ -2,15 +2,23 @@ name: Fallacy Tarot Automation
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Her 6 saatte bir çalışır
-  workflow_dispatch:      # Manuel olarak da tetiklenebilir
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:  # Manual trigger
+
+concurrency:
+  group: fallacy-automation-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   fetch-and-analyze:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,43 +32,90 @@ jobs:
         run: |
           pip install requests pillow huggingface_hub python-dotenv
 
-      - name: Fetch Reddit Data (wget only)
+      - name: Fetch Reddit Data
+        timeout-minutes: 2
         run: |
           mkdir -p data
           USER_AGENT="FallacyTarotBot/1.0 (by /u/fallacy_tarot)"
           SUBREDDITS=("worldnews" "fallacy" "philosophy" "funny" "science" "todayilearned" "changemyview")
-          
+
           echo "Fetching Reddit data via wget..."
-          > data/raw_reddit.jsonl
-          
+
           for sub in "${SUBREDDITS[@]}"; do
             echo "Trying r/${sub}..."
             URL="https://www.reddit.com/r/${sub}/top.json?t=week&limit=15"
-            
+
             if wget --timeout=10 --tries=2 -U "$USER_AGENT" -O "data/reddit_${sub}.json" "$URL" 2>/dev/null; then
               echo "Success fetching r/${sub}"
               sleep 2
             else
-              echo "Failed to fetch r/${sub}, will rely on fallback in Python"
+              echo "Failed to fetch r/${sub}, will rely on Python client"
             fi
           done
-          
+
           echo "Raw JSON files saved in data/ directory."
 
-      - name: Run Fallacy Analysis & Generation
+      - name: Run Fallacy Analysis
+        timeout-minutes: 5
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          python .github/workflows/run_fallacy_analysis.py
+          python scripts/main.py
 
       - name: Ensure Output Directories Exist
         run: |
           mkdir -p data output_images generated_cards
 
       - name: Commit and Push Results
+        timeout-minutes: 10
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/ output_images/ generated_cards/ || true
-          git diff --staged --quiet || git commit -m "Auto-update: New fallacy cards generated [skip ci]"
-          git push
+
+          git add data/ docs/data/ output_images/ generated_cards/ || true
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            echo "Changes detected, committing and pushing..."
+
+            # Conflict resolution: pull first, then commit
+            if git pull --rebase origin/main 2>&1 | grep -q "up-to-date"; then
+              echo "Already up to date, no pull needed"
+            else
+              echo "Pulling with conflict resolution..."
+              git pull --rebase origin/main || git pull --strategy-option=theirs origin/main
+            fi
+
+            git commit -m "Auto-update: New fallacy cards generated [skip ci]"
+            git push origin main
+          fi
+
+  deploy-to-github-pages:
+    needs: fetch-and-analyze
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
