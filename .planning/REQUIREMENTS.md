@@ -123,9 +123,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LIBRARY-03 | Phase 2 | Pending |
 | LIBRARY-04 | Phase 2 | Pending |
 | LIBRARY-05 | Phase 2 | Pending |
-| TAROT-01 | Phase 2 | Pending |
-| TAROT-02 | Phase 2 | Pending |
-| TAROT-03 | Phase 2 | Pending |
+| TAROT-01 | Phase 1 | Pending |
+| TAROT-02 | Phase 1 | Pending |
+| TAROT-03 | Phase 1 | Pending |
 | TAROT-04 | Phase 1 | Pending |
 | ACCESS-01 | Phase 1 | Pending |
 | ACCESS-02 | Phase 1 | Pending |
@@ -143,8 +143,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 **Coverage:**
 - v1 requirements: 38 total
-- Mapped to phases: 0
-- Unmapped: 38 ⚠️
+- Mapped to phases: 38 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-14*
