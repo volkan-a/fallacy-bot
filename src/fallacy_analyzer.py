@@ -128,7 +128,11 @@ def parse_reddit_json():
         return []
 
 def load_reddit_from_data_folder():
-    """data/ klasöründeki Reddit JSON dosyalarını yükler (GitHub Actions tarafından indirilen)."""
+    """data/ klasöründeki Reddit JSON dosyalarını yükler (GitHub Actions tarafından indirilen).
+    
+    GitHub Actions workflow'u data/raw_reddit.jsonl dosyasını JSON Lines formatında oluşturur.
+    Format: Her satır {"subreddit": "name", "posts": [...]} şeklinde JSON object.
+    """
     all_posts = []
     
     print("\n[Reddit Veri Kaynağı - data/ klasörü]")
@@ -138,46 +142,91 @@ def load_reddit_from_data_folder():
         print(f"⚠️  {DATA_DIR} klasörü bulunamadı.")
         return []
     
-    # Tüm JSON dosyalarını tara
+    # Önce raw_reddit.jsonl dosyasını kontrol et (GitHub Actions tarafından oluşturulan)
+    jsonl_path = os.path.join(DATA_DIR, "raw_reddit.jsonl")
+    if os.path.exists(jsonl_path) and os.path.getsize(jsonl_path) > 0:
+        print(f"📄 {jsonl_path} dosyası bulundu, parse ediliyor...")
+        try:
+            with open(jsonl_path, 'r', encoding='utf-8') as f:
+                for line_num, line in enumerate(f, 1):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                        subreddit_name = data.get('subreddit', 'unknown')
+                        posts = data.get('posts', [])
+                        
+                        for post in posts:
+                            post_data = post.get('data', {})
+                            title = post_data.get('title', '')
+                            selftext = post_data.get('selftext', '')
+                            
+                            content = f"{title} {selftext}".strip()
+                            
+                            if len(content) > 50 and len(content) < 800:
+                                all_posts.append({
+                                    'title': title,
+                                    'text': content,
+                                    'url': f"https://reddit.com{post_data.get('permalink', '#')}",
+                                    'score': post_data.get('score', 0),
+                                    'author': post_data.get('author', 'anonymous'),
+                                    'created_utc': post_data.get('created_utc', 0),
+                                    'subreddit': subreddit_name
+                                })
+                        
+                        print(f"✅ Satır {line_num}: r/{subreddit_name} üzerinden {len(posts)} gönderi yüklendi.")
+                    except json.JSONDecodeError as e:
+                        print(f"⚠️  Satır {line_num} JSON parse hatası: {e}")
+            
+            print(f"\n🎯 Toplam {len(all_posts)} gönderi yüklendi (JSONL).")
+            if all_posts:
+                return all_posts
+        except Exception as e:
+            print(f"❌ JSONL okuma hatası: {e}")
+    
+    # Eğer JSONL yoksa veya boşsa, eski reddit_*.json dosyalarını kontrol et (geriye dönük uyumluluk)
     json_files = [f for f in os.listdir(DATA_DIR) if f.startswith('reddit_') and f.endswith('.json')]
     
-    if not json_files:
-        print("⚠️  data/ klasöründe reddit_*.json dosyası bulunamadı.")
-        return []
-    
-    for json_file in sorted(json_files):
-        file_path = os.path.join(DATA_DIR, json_file)
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            children = data.get('data', {}).get('children', [])
-            subreddit_name = json_file.replace('reddit_', '').replace('.json', '')
-            
-            for child in children:
-                post_data = child.get('data', {})
-                title = post_data.get('title', '')
-                selftext = post_data.get('selftext', '')
+    if json_files:
+        print("Eski format reddit_*.json dosyaları kontrol ediliyor...")
+        for json_file in sorted(json_files):
+            file_path = os.path.join(DATA_DIR, json_file)
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
                 
-                content = f"{title} {selftext}".strip()
+                children = data.get('data', {}).get('children', [])
+                subreddit_name = json_file.replace('reddit_', '').replace('.json', '')
                 
-                if len(content) > 50 and len(content) < 800:
-                    all_posts.append({
-                        'title': title,
-                        'text': content,
-                        'url': f"https://reddit.com{post_data.get('permalink', '#')}",
-                        'score': post_data.get('score', 0),
-                        'author': post_data.get('author', 'anonymous'),
-                        'created_utc': post_data.get('created_utc', 0),
-                        'subreddit': subreddit_name
-                    })
-            
-            print(f"✅ {json_file} üzerinden {len(children)} gönderi yüklendi.")
-        except Exception as e:
-            print(f"❌ {json_file} okuma hatası: {e}")
+                for child in children:
+                    post_data = child.get('data', {})
+                    title = post_data.get('title', '')
+                    selftext = post_data.get('selftext', '')
+                    
+                    content = f"{title} {selftext}".strip()
+                    
+                    if len(content) > 50 and len(content) < 800:
+                        all_posts.append({
+                            'title': title,
+                            'text': content,
+                            'url': f"https://reddit.com{post_data.get('permalink', '#')}",
+                            'score': post_data.get('score', 0),
+                            'author': post_data.get('author', 'anonymous'),
+                            'created_utc': post_data.get('created_utc', 0),
+                            'subreddit': subreddit_name
+                        })
+                
+                print(f"✅ {json_file} üzerinden {len(children)} gönderi yüklendi.")
+            except Exception as e:
+                print(f"❌ {json_file} okuma hatası: {e}")
+        
+        print(f"\n🎯 Toplam {len(all_posts)} gönderi yüklendi (eski format).")
+        if all_posts:
+            return all_posts
     
-    print(f"\n🎯 Toplam {len(all_posts)} gönderi yüklendi.")
-    return all_posts
+    print("⚠️  data/ klasöründe geçerli Reddit verisi bulunamadı.")
+    return []
 
 def get_reddit_posts():
     """Reddit'ten popüler gönderileri çek - Önce data/ klasörünü kontrol eder (GitHub Actions)
@@ -444,8 +493,9 @@ def main():
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(all_data, f, ensure_ascii=False, indent=2)
     
-    print(f"Toplam {len(all_data)} mantık hatası kaydedildi.")
-    print("Veriler docs/fallacies.json dosyasına kaydedildi.")
+    print(f"\n🌐 Toplam {len(all_data)} mantık hatası web için kaydedildi.")
+    print(f"📁 Veriler {DATA_FILE} dosyasına kaydedildi.")
+    print(f"💾 Incremental veriler {INCREMENTAL_FILE} dosyasına kaydedildi.")
 
 if __name__ == "__main__":
     main()
