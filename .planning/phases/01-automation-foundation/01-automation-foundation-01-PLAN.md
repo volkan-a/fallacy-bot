@@ -8,13 +8,14 @@ files_modified: [.github/workflows/fallacy_automation.yml, scripts/main.py]
 autonomous: true
 requirements: [GHA-01, GHA-02, GHA-06, GHA-07, SEC-05]
 
-must_haves:
+  must_haves:
   truths:
     - "GitHub Actions workflow runs automatically every 6 hours on cron schedule"
     - "Workflow concurrency group prevents parallel runs from conflicting"
     - "Aggressive timeouts (10s Reddit, 30s LLM, 90s image) prevent 6-hour GitHub Actions limit"
     - "Git operations handle conflicts with conflict resolution logic"
     - "HF_TOKEN is securely accessed from GitHub Secrets, never committed to repo"
+    - "GitHub Pages auto-deploys from docs/ folder when JSON files are committed"
   artifacts:
     - path: ".github/workflows/fallacy_automation.yml"
       provides: "Complete GitHub Actions automation workflow"
@@ -30,10 +31,10 @@ must_haves:
 ---
 
 <objective>
-Enhance GitHub Actions workflow with production-grade reliability features: concurrency control, aggressive timeouts, conflict resolution, and secure secrets management.
+Enhance GitHub Actions workflow with production-grade reliability features: concurrency control, aggressive timeouts, conflict resolution, secure secrets management, and GitHub Pages deployment.
 
-Purpose: Prevent workflow failures from concurrent runs, 6-hour timeout, and git conflicts. Ensure zero-cost operation with secure token handling.
-Output: Robust GitHub Actions workflow that runs reliably every 6 hours.
+Purpose: Prevent workflow failures from concurrent runs, 6-hour timeout, and git conflicts. Ensure zero-cost operation with secure token handling and automatic GitHub Pages deployment.
+Output: Robust GitHub Actions workflow that runs reliably every 6 hours and auto-deploys to GitHub Pages.
 </objective>
 
 <execution_context>
@@ -61,46 +62,94 @@ Output: Robust GitHub Actions workflow that runs reliably every 6 hours.
 Modify the existing .github/workflows/fallacy_automation.yml file to add:
 
 1. **Concurrency group** to prevent parallel runs:
-   ```yaml
-   concurrency:
-     group: fallacy-automation-${{ github.ref }}
-     cancel-in-progress: true
-   ```
+    ```yaml
+    concurrency:
+      group: fallacy-automation-${{ github.ref }}
+      cancel-in-progress: true
+    ```
 
-2. **Aggressive per-operation timeouts** (under fetch-and-analyze job):
-   ```yaml
-   timeout-minutes: 90
-   steps:
-     # ... existing steps ...
-     - name: Fetch Reddit Data
-       timeout-minutes: 2
-       run: |
-         # ... existing wget commands with --timeout=10 ...
-   
-     - name: Run Fallacy Analysis & Generation
-       timeout-minutes: 5
-       env:
-         HF_TOKEN: ${{ secrets.HF_TOKEN }}
-       run: python scripts/main.py
-   
-     - name: Commit and Push Results
-       timeout-minutes: 10
-       # ... existing commit/push ...
-   ```
+2. **Add GitHub Pages deployment permissions** (at workflow level):
+    ```yaml
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    ```
 
-3. **Secure HF_TOKEN access** (already present, verify it's correct):
-   ```yaml
-   - name: Run Fallacy Analysis & Generation
-     env:
-       HF_TOKEN: ${{ secrets.HF_TOKEN }}
-   ```
+3. **Aggressive per-operation timeouts** (under fetch-and-analyze job):
+    ```yaml
+    timeout-minutes: 90
+    steps:
+      # ... existing steps ...
+      - name: Fetch Reddit Data
+        timeout-minutes: 2
+        run: |
+          # ... existing wget commands with --timeout=10 ...
+
+      - name: Run Fallacy Analysis & Generation
+        timeout-minutes: 5
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python scripts/main.py
+
+      - name: Commit and Push Results
+        timeout-minutes: 10
+        # ... existing commit/push ...
+    ```
+
+4. **Secure HF_TOKEN access** (already present, verify it's correct):
+    ```yaml
+    - name: Run Fallacy Analysis & Generation
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    ```
+
+5. **Add GitHub Pages deployment job** (after fetch-and-analyze job):
+    ```yaml
+  deploy-to-github-pages:
+    needs: fetch-and-analyze
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+    ```
+
+**IMPORTANT: GitHub Pages Repository Configuration**
+This workflow deploys to GitHub Pages. For auto-deployment to work correctly, the repository must be configured as follows (this is a one-time manual setup):
+
+1. Go to repository Settings → Pages
+2. Set Source to "Deploy from a branch"
+3. Select branch: `main` (or your default branch)
+4. Set folder to: `/docs`
+5. Click Save
+
+This configuration enables GitHub Pages to automatically deploy the docs/ folder whenever it's committed. The workflow job ensures the deployment happens after JSON files are committed.
 
 Keep the existing cron schedule ('0 */6 * * *') and workflow_dispatch triggers.
   </action>
   <verify>
-grep -q "concurrency:" .github/workflows/fallacy_automation.yml && grep -q "timeout-minutes: 90" .github/workflows/fallacy_automation.yml && grep -q "HF_TOKEN: \${{ secrets.HF_TOKEN }}" .github/workflows/fallacy_automation.yml
+grep -q "concurrency:" .github/workflows/fallacy_automation.yml && grep -q "timeout-minutes: 90" .github/workflows/fallacy_automation.yml && grep -q "HF_TOKEN: \${{ secrets.HF_TOKEN }}" .github/workflows/fallacy_automation.yml && grep -q "deploy-to-github-pages:" .github/workflows/fallacy_automation.yml && grep -q "pages: write" .github/workflows/fallacy_automation.yml
   </verify>
-  <done>Workflow has concurrency control, 90-minute overall timeout, per-step timeouts, and secure HF_TOKEN access</done>
+  <done>Workflow has concurrency control, 90-minute overall timeout, per-step timeouts, secure HF_TOKEN access, and GitHub Pages deployment job</done>
 </task>
 
 <task type="auto">
@@ -242,7 +291,13 @@ Verify workflow has all reliability features:
 - [ ] Per-step timeouts (2min for Reddit, 5min for analysis)
 - [ ] HF_TOKEN accessed from GitHub Secrets
 - [ ] Git conflict resolution with pull-then-commit
+- [ ] GitHub Pages deployment job configured with pages: write permissions
+- [ ] deploy-to-github-pages job depends on fetch-and-analyze
+- [ ] Upload-pages-artifact uses docs/ folder
 - [ ] main.py orchestration script with logging created
+
+**One-time manual setup required:**
+Configure repository Settings → Pages → Source: "Deploy from a branch" → main → /docs folder
 
 Run workflow validation (dry run):
 ```bash
@@ -258,7 +313,9 @@ GitHub Actions workflow is production-ready with:
 - Aggressive timeouts preventing 6-hour limit
 - Secure token management (HF_TOKEN from secrets)
 - Git conflict resolution handling
+- GitHub Pages deployment job that auto-deploys docs/ folder when JSON files are committed
 - Main orchestration script with logging framework
+- Repository configured to deploy from /docs folder (one-time manual setup)
 </success_criteria>
 
 <output>

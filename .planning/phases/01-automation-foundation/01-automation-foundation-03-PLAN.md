@@ -41,9 +41,9 @@ must_haves:
 <objective>
 Create Hugging Face LLM integration with robust retry logic, graceful degradation, and confidence score classification.
 
-Purpose: Analyze Reddit posts for logical fallacies using Mistral-7B-Instruct (as determined by research and current code) with zero-cost Hugging Face free tier. Handle API failures gracefully.
+Purpose: Analyze Reddit posts for logical fallacies using Mistral-7B-Instruct-v0.3 (per REQUIREMENTS.md AUTO-03 and research recommendation) with zero-cost Hugging Face free tier. Handle API failures gracefully.
 Output: Production-ready LLM client module.
-</object>
+</objective>
 
 <execution_context>
 @/Users/volkanakkaya/.config/opencode/get-shit-done/workflows/execute-plan.md
@@ -74,7 +74,7 @@ Create scripts/fallacy_prompts.py with optimized prompts for fallacy detection:
 #!/usr/bin/env python3
 """
 LLM prompts for fallacy detection.
-Optimized for Mistral-7B-Instruct-v0.3 model (as per research and current code).
+Optimized for Mistral-7B-Instruct-v0.3 model (per REQUIREMENTS.md AUTO-03).
 """
 
 from typing import Dict
@@ -229,8 +229,7 @@ from fallacy_types import is_valid_fallacy_type
 logger = logging.getLogger(__name__)
 
 # Hugging Face configuration
-# Note: Using Mistral-7B-Instruct-v0.3 as per research and current code
-# (REQUIREMENTS.md mentions Gemma-3-4b-it but current implementation uses Mistral)
+# Using Mistral-7B-Instruct-v0.3 per REQUIREMENTS.md AUTO-03 and research recommendation
 HF_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 HF_API_URL = f"https://api-inference.huggingface.co/models/{HF_MODEL}/v1/chat/completions"
 
@@ -417,7 +416,7 @@ if __name__ == "__main__":
 ```
 
 This implementation:
-- Uses Mistral-7B-Instruct-v0.3 (per research and current code)
+- Uses Mistral-7B-Instruct-v0.3 (per REQUIREMENTS.md AUTO-03)
 - Implements exponential backoff with up to 5 retries (AI-01)
 - Returns JSON format with required fields (AI-02)
 - Classifies confidence as High/Medium/Low (AI-03)

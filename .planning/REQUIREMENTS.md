@@ -11,7 +11,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **AUTO-01**: System automatically scrapes popular Reddit posts every 6 hours via GitHub Actions cron schedule (00:00, 06:00, 12:00, 18:00 UTC)
 - [ ] **AUTO-02**: Reddit API client handles rate limits gracefully (30 req/min public, 60 req/min OAuth with ratelimit_seconds config up to 600s)
-- [ ] **AUTO-03**: Hugging Face Google Gemma-3-4b-it analyzes scraped posts for logical fallacies with confidence scores
+- [ ] **AUTO-03**: Hugging Face Mistral-7B-Instruct-v0.3 analyzes scraped posts for logical fallacies with confidence scores (updated from Gemma-3-4b-it based on research recommendation)
 - [ ] **AUTO-04**: System detects all 10 specific fallacy types (Ad Hominem, Straw Man, Appeal to Authority, False Dilemma, Slippery Slope, Circular Reasoning, Hasty Generalization, Red Herring, Tu Quoque, Appeal to Emotion)
 - [ ] **AUTO-05**: JSON data structure stores detected fallacies with fields: post_id, title, content, fallacy_type, confidence_score, upvotes, downvotes, timestamp, image_url
 - [ ] **AUTO-06**: Atomic JSON writes prevent data corruption during concurrent GitHub Actions runs
@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### AI Analysis & LLM Integration
 
 - [ ] **AI-01**: Hugging Face Inference API integration with exponential backoff retry logic (up to 5 retries)
-- [ ] **AI-02**: Google Gemma-3-4b-it text-classification pipeline returns format: `{'label': 'FALLACY_TYPE', 'score': 0.89}`
+- [ ] **AI-02**: Mistral-7B-Instruct-v0.3 chat-completions API returns JSON format: `{'has_fallacy': true/false, 'fallacy_type': 'FALLACY_TYPE', 'confidence': 0.89, 'explanation': '...', 'quote': '...'}` (updated from Gemma-3-4b-it based on research recommendation)
 - [ ] **AI-03**: Confidence scores displayed to users (High/Medium/Low based on threshold: >0.8, 0.5-0.8, <0.5)
 - [ ] **AI-04**: Graceful degradation when Hugging Face API unavailable (skip analysis, log error, continue with other posts)
 - [ ] **AI-05**: Content validation filters out NSFW, quarantined, or deleted Reddit posts before analysis
