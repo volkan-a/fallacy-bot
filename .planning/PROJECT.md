@@ -17,7 +17,7 @@ Automatically discover and beautifully present logical fallacies from Reddit dis
 ### Active
 
 - [ ] Automated Reddit scraping of popular posts
-- [ ] Hugging Face Mistral-7B-Instruct for fallacy detection
+- [ ] Hugging Face Google Gemma-3-4b-it for fallacy detection
 - [ ] Stable Diffusion XL for tarot card visual generation
 - [ ] Tarot-themed web interface with slider navigation
 - [ ] Voting system (upvote/downvote) with "Hot", "Best", "Newest" sorting
@@ -49,7 +49,7 @@ Automatically discover and beautifully present logical fallacies from Reddit dis
 
 **Technical Foundation:**
 - Data source: Reddit API (free)
-- LLM analysis: Hugging Face Mistral-7B-Instruct
+- LLM analysis: Hugging Face Google Gemma-3-4b-it (free tier)
 - Visual generation: Stable Diffusion XL
 - Automation: GitHub Actions (runs every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC)
 - Hosting: GitHub Pages
@@ -70,7 +70,7 @@ Automatically discover and beautifully present logical fallacies from Reddit dis
 - **Hosting**: GitHub Pages only (static HTML, no backend server)
 - **Frontend**: Vanilla JavaScript only (no frameworks like React)
 - **Data**: JSON file-based storage (no databases)
-- **LLM**: Hugging Face Mistral-7B-Instruct (free tier)
+- **LLM**: Hugging Face Google Gemma-3-4b-it (free tier)
 - **Image Generation**: Stable Diffusion XL (free tier)
 - **Fallacy Types**: Must detect all 10 specific fallacy types listed in README
 
@@ -79,7 +79,7 @@ Automatically discover and beautifully present logical fallacies from Reddit dis
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Scheduled 6-hour automation | Reddit API rate limits, avoid spamming, balance freshness with cost | — Pending |
-| Hugging Face over OpenAI | Zero-cost requirement, Mistral-7B-Instruct sufficient for fallacy detection | — Pending |
+| Hugging Face over OpenAI | Zero-cost requirement, Google Gemma-3-4b-it sufficient for fallacy detection | — Pending |
 | Stable Diffusion XL | Free tier available, high-quality image generation suitable for tarot card visuals | — Pending |
 | GitHub Pages static hosting | Zero-cost, automatic deployment, integrates with GitHub Actions workflow | — Pending |
 | Vanilla JavaScript over frameworks | Simpler maintenance, faster page loads, meets zero-cost requirement | — Pending |

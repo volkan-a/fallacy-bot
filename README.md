@@ -89,7 +89,7 @@ Sistem şu mantık hatalarını tespit edebilir:
 ## 🛠️ Teknolojiler
 
 - **Veri Kaynağı**: Reddit API (ücretsiz)
-- **LLM Analiz**: Hugging Face Mistral-7B-Instruct
+- **LLM Analiz**: Hugging Face Google Gemma-3-4b-it (ücretsiz)
 - **Görsel Üretim**: Stable Diffusion XL
 - **Otomasyon**: GitHub Actions
 - **Hosting**: GitHub Pages
