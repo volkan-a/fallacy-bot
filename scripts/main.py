@@ -31,14 +31,14 @@ logger = logging.getLogger(__name__)
 
 # Import client modules
 try:
-    from scripts.reddit_client import fetch_reddit_posts
+    from scripts.hn_client import fetch_reddit_posts
     from scripts.hf_client import analyze_fallacy
     from scripts.data_manager import DataManager
     from scripts.image_generator import generate_card_for_fallacy
 except ImportError as e:
     try:
         # Try local imports if running from inside scripts/
-        from reddit_client import fetch_reddit_posts
+        from hn_client import fetch_reddit_posts
         from hf_client import analyze_fallacy
         from data_manager import DataManager
         from image_generator import generate_card_for_fallacy
