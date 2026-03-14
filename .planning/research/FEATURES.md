@@ -1,147 +1,211 @@
-# Feature Landscape
+# Feature Research
 
-**Domain:** Logical Fallacy Detection AI System
+**Domain:** Automated Reddit logical fallacy detection with tarot card visualization
 **Researched:** 2026-03-14
+**Confidence:** HIGH (official documentation sources: PRAW, Reddit API, Hugging Face Transformers, web.dev, MDN)
 
-## Table Stakes
+## Feature Landscape
 
-Features users expect. Missing = product feels incomplete.
+### Table Stakes (Users Expect These)
+
+Features users assume exist. Missing these = product feels incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Text Input Methods** (paste text box, character counter, clear button) | Users need to input text to analyze; standard UX pattern | Low | Must handle 10,000+ characters based on GPTZero patterns |
-| **Fallacy Detection** (identify common fallacies in text) | Core value proposition - without detection, no product exists | High | AI-dependent; requires integration with OpenAI API or similar |
-| **Visual Results Display** (highlighted fallacies, color-coded) | Users expect to see where fallacies occur in their text | Medium | Sentence-level highlighting is standard expectation (GPTZero pattern) |
-| **Fallacy Explanations** (what is it, why it's a fallacy) | Educational value requires understanding, not just detection | Low | Essential for learning; can be pre-written content for common fallacies |
-| **Examples for Each Fallacy** (real-world examples) | Helps users recognize fallacies in context | Low | Can use curated examples from existing databases |
-| **Searchable Fallacy Library** (browse by category or name) | Users often want to learn about specific fallacies, not just analyze text | Medium | Category-based navigation is established pattern (Your Logical Fallacy Is, Kialo) |
-| **Mobile-Responsive Design** (works on all devices) | Modern web app requirement per PROJECT.md constraints | Low | Required for accessibility; tablets and phones common usage |
-| **Clear Loading/Processing Indicators** (spinners, progress) | AI analysis takes time; users need feedback about what's happening | Low | Standard UX pattern for async operations |
-| **Error Handling** (invalid input, API failures) | Robust systems handle errors gracefully | Medium | Must handle network errors, rate limits, malformed input |
-| **Accessibility Compliance** (WCAG 2.1 AA, keyboard nav, screen reader) | Required by PROJECT.md constraints; legal requirement for public web tools | Low | Keyboard navigation and ARIA labels essential |
-| **Clear Call-to-Actions** (analyze button, learn more) | Users need to know what to do next | Low | Primary action must be visually prominent |
+| Automated content fetching | Users expect fresh content regularly; stale data = dead site | Low | Reddit API rate limiting requires careful scheduling (PRAW ratelimits: 600s max wait) |
+| Error handling & fallbacks | Bots fail; users expect graceful degradation, not broken pages | Medium | PRAW automatically retries within `ratelimit_seconds` config; implement explicit exception handlers |
+| Content display interface | Can't have analysis without visualization; core value delivery mechanism | Medium | Static HTML/CSS/JS as specified (no frameworks) |
+| Basic sorting (Hot/Newest) | Reddit users expect familiar content ordering patterns | Low | Implement client-side JavaScript sorting from JSON data |
+| Responsive design | Mobile traffic dominates; non-responsive = 50%+ users bounce | Medium | Use CSS flexbox/grid; mobile-first approach (MDN web.dev patterns) |
+| Image lazy loading | Large card images kill page load speeds; users abandon slow pages (web.dev: <3s critical) | Low | Browser-native `loading="lazy"` attribute or Intersection Observer |
+| Performance metrics | Page load speed directly impacts user engagement (web.dev Core Web Vitals) | Medium | Monitor LCP < 2.5s, CLS < 0.1, INP < 200ms |
+| Content validation | Garbage in = garbage out; broken Reddit posts break UX | Medium | Validate JSON structure, handle missing fields, filter NSFW/quarantined content |
 
-## Differentiators
+### Differentiators (Competitive Advantage)
 
-Features that set product apart. Not expected, but valued.
+Features that set product apart. Not required, but valuable.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Tarot Card Visual Theme** (mystical, engaging visual design for each fallacy) | Unique branding; memorable; differentiates from plain text competitors | Medium | Explicit PROJECT.md requirement; creates emotional connection |
-| **Visual Metaphors** (tarot card imagery that relates to fallacy meaning) | Aids memory retention; makes abstract concepts concrete | High | Requires design work mapping fallacies to visual symbols |
-| **Sentence-Level Highlights with Confidence Scores** (show exactly which text, how certain) | Transparency builds trust; helps users understand AI confidence | Medium | GPTZero pattern - color-coded by confidence level (High/Medium/Low) |
-| **Multi-Fallacy Detection** (identify multiple fallacies in single text) | Real-world arguments contain multiple errors; users want complete analysis | High | Requires sophisticated AI to avoid false positives and overlapping detections |
-| **Context-Sensitive Explanations** (explain in context of user's specific text) | More helpful than generic explanations; personalized learning | Medium | Requires AI to generate context-aware explanations, not just fetch pre-written content |
-| **Fallacy Severity Rating** (minor issue vs major logical flaw) | Helps users prioritize what to address first | Medium | Useful for educational context and practical improvement |
-| **Related Fallacy Suggestions** (if X is present, check for Y) | Fallacies often cluster; encourages deeper learning | Medium | Pattern-based recommendations (e.g., ad hominem often co-occurs with straw man) |
-| **Export Results** (PDF, shareable link, copy formatted text) | Useful for students, teachers, researchers; enables sharing | Medium | GPTZero offers this; expected in educational tools |
-| **Citation of Detected Fallacy Locations** (line numbers, highlighted passages) | Helps users return to specific parts of their text | Low | Standard feature in text analysis tools |
-| **Visual Fallacy Relationships** (how fallacies relate to each other) | Helps users understand the taxonomy and connections | High | Could use interactive graph or tree structure |
-| **Progress Tracking** (fallacies you've learned, improvement over time) | Gamification increases engagement; educational value | High | Requires user accounts (deferred to v2 per PROJECT.md) |
-| **Practice Mode** (sample texts to test your detection skills) | Active learning is more effective than passive reading | Medium | Requires curated sample texts with known fallacies |
-| **Difficulty Levels** (beginner, intermediate, advanced analysis) | Makes tool accessible to users with varying expertise | Medium | Affects depth of explanations and detection sensitivity |
-| **Real-Time Analysis Preview** (show detection as you type, with debounce) | Immediate feedback improves UX; reduces wait time | Medium | Debouncing required to avoid excessive API calls |
+| Tarot card visual generation | Unique metaphor transforms dry logic analysis into engaging mystical experience; memorable brand identity | High | Stable Diffusion XL via free tier; generate distinctive card imagery per fallacy type |
+| AI fallacy detection with confidence scores | Transparent AI builds trust; users see "how sure" the analysis is (Hugging Face pipelines output scores) | Medium | Text-classification pipeline returns `{'label': 'AD_HOMINEM', 'score': 0.89}` |
+| Slider navigation for card browsing | Novel UX pattern aligns with tarot theme; encourages exploration vs list scrolling | Medium | Custom JavaScript slider; CSS transforms for card flip/transition effects |
+| Reddit-style voting system | Familiar interaction pattern for Reddit audience; gamification increases engagement | Low | Client-side vote storage in localStorage or track votes via JSON |
+| Mystical-themed UI design | Strong visual differentiation; creates emotional connection to topic | Medium | Blues, purples, gold accents; consistent typography and iconography |
+| 10 specific fallacy types | Comprehensive coverage vs competitors that focus on 1-2 fallacies | Low | Ad Hominem, Straw Man, Appeal to Authority, False Dilemma, Slippery Slope, Circular Reasoning, Hasty Generalization, Red Herring, Tu Quoque, Appeal to Emotion |
+| Zero-cost operation | Sustainable long-term; accessible to hobbyists; no VC pressure | High | GitHub Actions automation + free tiers (Reddit API, Hugging Face, GitHub Pages) |
+| Scheduled 6-hour updates | Balance between freshness and rate limits; predictable content cadence | Low | GitHub Actions cron schedule; respects Reddit API limits |
 
-## Anti-Features
+### Anti-Features (Commonly Requested, Often Problematic)
 
-Features to explicitly NOT build.
+Features that seem good but create problems.
 
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| **Social Features** (voting, sharing to social media, comments) | Out of scope per PROJECT.md v1; adds complexity; privacy concerns | Focus on core detection; defer to v2+ |
-| **User Accounts and Authentication** (login, profiles, history) | Out of scope per PROJECT.md v1; adds infrastructure complexity; anonymous usage for v1 | Browser-based session storage for temporary history; defer accounts to v2 |
-| **Multi-Language Support** (non-English UI or analysis) | Out of scope per PROJECT.md v1; requires translation resources; English-only for v1 | Focus on English content quality; defer i18n to v2+ |
-| **Real-Time Reddit/Forum Scraping** (automated analysis of external content) | Out of scope per PROJECT.md v1; legal and technical challenges | Manual text input only; defer automated scraping to v2 |
-| **Grammar/Spelling Correction** (integrated grammar checker) | Not core value; GPTZero has this but it's secondary to fallacy detection | Focus on fallacies; partner with or recommend grammar tools |
-| **AI Detection** (detect if text is AI-generated like GPTZero) | Different product category; dilutes focus on logical fallacies | Stick to fallacy detection; avoid feature creep |
-| **Debate Platform** (structured arguments, pro/con like Kialo) | Different product category; complex moderation required | Focus on analysis, not facilitation of debates |
-| **Paid Subscriptions/Monetization** (premium tiers, paywalls) | V1 is validation phase; monetization premature | Free access to gather usage data and feedback |
-| **Native Mobile Apps** (iOS/Android applications) | Out of scope per PROJECT.md (web-only); expensive development | Progressive Web App (PWA) capabilities; defer native apps to v2+ |
-| **Advanced AI Model Training** (custom ML models beyond OpenAI API) | High complexity; time/resource intensive; OpenAI API sufficient | Use OpenAI API for v1; evaluate custom models for v2+ |
-| **Community Forums or Q&A** (like Logically Fallacious archive) | Requires moderation; out of scope per PROJECT.md v1 | Use existing resources (e.g., Stanford Encyclopedia of Philosophy) for deep dives |
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| User accounts & authentication | "Track user progress," "save favorites" | Adds backend complexity, requires database, violates zero-cost constraint, increases attack surface | LocalStorage for preferences/favorites; no login needed for read-only experience |
+| Real-time Reddit scraping | "Live updates," "immediate results" | Violates Reddit API rate limits (brand new accounts get blocked), unpredictable cost, GitHub Actions timeout limits | Scheduled 6-hour batch processing; sufficient for discovery platform use case |
+| Backend server | "Persistent data storage," "websockets for live voting" | Requires hosting cost ($5-50/month), DevOps overhead, violates GitHub Pages constraint | JSON file storage served via GitHub Pages; client-side state management |
+| Database (SQL/NoSQL) | "Reliable data storage," "query capabilities" | Overkill for read-only content; requires managed service or self-hosting; operational complexity | JSON files (fallacies.json, archive.json) committed to git; simple and sufficient |
+| Multi-language support | "International users," "broader audience" | Increases LLM inference cost 4-10x, complicates UI, translation quality varies, dilutes MVP focus | English-only for v1; evaluate demand post-launch |
+| Paid LLM APIs (OpenAI, Anthropic) | "Better accuracy," "faster inference" | Recurring costs ($10-100/month), budget anxiety as user count grows, pricing changes | Hugging Face free tier Mistral-7B-Instruct; sufficient for fallacy classification task |
+| Comment system on website | "User discussions," "community building" | Requires moderation (spam, toxicity), legal liability, duplicates Reddit discussions | Link to original Reddit thread; let Reddit handle comments |
+| Real-time voting updates | "Live vote counts," "social proof" | Requires WebSocket server, breaks static hosting constraint, complexity disproportionate to value | Vote counts update on next 6-hour refresh; show "last updated" timestamp |
+| Advanced search/filtering | "Find specific fallacies," "filter by subreddit" | Increases JSON payload size, requires backend query logic, UI complexity | Simple client-side filter by fallacy type; basic search across titles |
 
 ## Feature Dependencies
 
 ```
-Text Input → Fallacy Detection → Visual Results Display
-                                                ↓
-                           Fallacy Explanations ← Category Browsing
+Reddit Scraping (PRAW)
+    └──requires──> Reddit API credentials
+                  └──requires──> Rate limit handling (ratelimit_seconds config)
+                  └──requires──> JSON data structure definition
+                              └──requires──> Fallback/error handling
 
-Fallacy Detection → Sentence-Level Highlights → Confidence Scores
-                                                  ↓
-                                    Context-Sensitive Explanations
+AI Fallacy Detection (Hugging Face)
+    └──requires──> Reddit post content (title + body)
+    └──requires──> Mistral-7B-Instruct model loading
+                  └──requires──> Confidence score extraction
+                              └──requires──> Fallacy type classification (10 types)
+                              └──enhances──> UI display (show confidence to users)
 
-Visual Results Display → Export Results
-                         ↓
-              Citation of Locations
+Tarot Card Generation (Stable Diffusion XL)
+    └──requires──> Fallacy type detected
+                  └──requires──> Image generation prompts per fallacy
+                  └──requires──> Image storage in docs/assets/
+                              └──requires──> Placeholder cards for generation failures
 
-Fallacy Library → Search → Browse by Category
-                                    ↓
-                       Related Fallacy Suggestions
+Slider Navigation UI
+    └──requires──> Image assets available
+    └──requires──> JSON data with image paths
+    └──requires──> CSS transforms/transitions
+                  └──enhances──> Mystical theme immersion
 
-Tarot Card Visual Design → All visual displays (results, library, examples)
+Voting System
+    └──requires──> JSON data structure (upvote/downvote fields)
+    └──requires──> LocalStorage for vote tracking
+                  └──requires──> "Hot", "Best", "Newest" sorting algorithms
+                              └──enhances──> Reddit-like UX familiarity
+
+GitHub Actions Automation
+    └──requires──> All Python scripts functional
+    └──requires──> JSON file generation
+                  └──requires──> Git commit/push workflow
+                              └──requires──> GitHub Pages deployment trigger
+
+Performance Optimization
+    └──requires──> Image lazy loading
+    └──requires──> Image compression
+    └──requires──> CSS minification (optional)
+                  └──enhances──> User retention (Core Web Vitals)
 ```
 
-**Critical Dependencies:**
-1. **Fallacy Detection → Visual Results Display**: Can't show results without detection
-2. **Fallacy Library → Search/Browse**: Library must exist before it can be searched
-3. **OpenAI API Integration → Context-Sensitive Explanations**: Requires AI to generate context-aware content
-4. **User Accounts (deferred) → Progress Tracking**: Can't track progress without user identity
+### Dependency Notes
 
-**Independent Features (can be built in parallel):**
-- Tarot visual design system
-- Fallacy library content (explanations, examples)
-- Mobile-responsive layout
-- Accessibility features
+- **Reddit Scraping requires Rate Limit Handling:** PRAW automatically respects X-Ratelimit-* headers; but unknown limits require additional wait time (up to 600s). Configure `ratelimit_seconds=300` (5 minutes) to prevent RedditAPIException. Source: PRAW ratelimits docs.
 
-## MVP Recommendation
+- **AI Detection enhances UI Display:** Confidence scores from Hugging Face text-classification pipeline (`{'label': 'FALLACY_TYPE', 'score': 0.89}`) should be displayed to build trust. Users prefer transparent AI. Source: Hugging Face Transformers pipeline docs.
 
-Prioritize for v1:
-1. **Text Input with character counter** (Table stakes - essential)
-2. **Fallacy Detection using OpenAI API** (Table stakes - core product)
-3. **Visual Results Display with sentence-level highlights** (Table stakes - expected UX)
-4. **Fallacy Explanations with examples** (Table stakes - educational value)
-5. **Searchable Fallacy Library with categories** (Table stakes - learning resource)
-6. **Tarot Card Visual Theme for fallacies** (Differentiator - core brand)
-7. **Mobile-responsive design** (Table stakes - required by PROJECT.md)
-8. **Accessibility compliance (WCAG 2.1 AA)** (Table stakes - required by PROJECT.md)
+- **Tarot Card Generation requires Fallback Handling:** Stable Diffusion XL free tier has rate limits and occasional failures. Must implement placeholder card images for when generation fails. Don't block automation on image generation.
 
-**One Differentiator in MVP:**
-- **Tarot Card Visual Theme** (unique branding; memorable; PROJECT.md requirement)
+- **Voting System enhances Sorting:** "Hot" algorithm (like Reddit's Wilson score interval) requires vote data. "Best" uses net upvotes. "Newest" uses timestamp. These sorting methods depend on vote data structure.
 
-Defer:
-- **User accounts and history** (deferred to v2 per PROJECT.md)
-- **Progress tracking and gamification** (requires accounts; defer to v2)
-- **Export features** (nice to have; can add after core works)
-- **Real-time preview** (complexity vs value tradeoff; defer post-v1)
-- **Multi-language support** (deferred to v2 per PROJECT.md)
-- **Social features** (deferred to v2 per PROJECT.md)
+- **GitHub Actions Automation triggers GitHub Pages:** When automation commits JSON files to docs/data/, GitHub Pages automatically deploys. No separate deployment step needed if configured correctly.
 
-**Rationale:** Focus on core detection + unique tarot theme for v1. Get the fundamental value proposition working with visual polish. Advanced features can be added once users validate the core concept.
+- **Performance Optimization enhances User Retention:** Web.dev research shows pages >3s load time lose 50%+ traffic. Image lazy loading, compression, and Core Web Vitals monitoring (LCP, CLS, INP) are critical for this content-heavy site with many card images.
+
+## MVP Definition
+
+### Launch With (v1)
+
+Minimum viable product — what's needed to validate concept.
+
+- [x] **Automated Reddit scraping** — Core data pipeline; fetch popular posts every 6 hours via GitHub Actions
+- [x] **AI fallacy detection** — Core value proposition; classify posts into 10 fallacy types with confidence scores using Hugging Face Mistral-7B-Instruct
+- [x] **Basic web interface** — Content delivery; static HTML/CSS/JS displaying detected fallacies
+- [x] **Error handling & fallbacks** — Reliability; handle Reddit API rate limits, LLM failures, image generation failures gracefully
+- [x] **Placeholder tarot cards** — Visual baseline; use pre-designed placeholder images if SD XL fails (don't block on image gen)
+- [ ] **Slider navigation UI** — Differentiator; custom slider for browsing cards (can launch with list view first if needed)
+- [ ] **Client-side voting** — Engagement; basic upvote/downvote with localStorage tracking
+- [ ] **"Hot" sorting algorithm** — Familiar UX; implement Wilson score interval or simplified version
+
+### Add After Validation (v1.x)
+
+Features to add once core is working.
+
+- [ ] **Tarot card image generation** — After verifying detection accuracy works; integrate Stable Diffusion XL for unique visuals per fallacy
+- [ ] **Full "Hot", "Best", "Newest" sorting** — After voting system is stable; refine algorithms based on user behavior
+- [ ] **Mystical theme polish** — After basic UI works; add advanced CSS animations, particle effects, audio (optional)
+- [ ] **Responsive design optimization** — After desktop version works; mobile-first refinement
+- [ ] **Performance monitoring** — After users are engaging; add Lighthouse CI, track Core Web Vitals
+
+### Future Consideration (v2+)
+
+Features to defer until product-market fit is established.
+
+- [ ] **Archive browsing** — Only if users want historical fallacy detection; currently focuses on fresh content
+- [ ] **Multi-language support** — Only if non-English user demand is demonstrated; requires LLM translation
+- [ ] **Reddit thread embedding** — Only if engagement metrics show value in keeping users on-site vs linking out
+- [ ] **User preferences/filters** — Only if users request customization; currently curatorial approach is intentional
+- [ ] **Advanced search** — Only if volume of fallacies makes browsing difficult; currently limited to 6-hour batches
+- [ ] **Shareable cards** — Only if social sharing metrics show demand; currently read-only discovery platform
+
+## Feature Prioritization Matrix
+
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Automated Reddit scraping | HIGH | MEDIUM | P1 |
+| AI fallacy detection (10 types) | HIGH | MEDIUM | P1 |
+| Basic web interface (list view) | HIGH | LOW | P1 |
+| Error handling & fallbacks | HIGH | MEDIUM | P1 |
+| Placeholder tarot cards | MEDIUM | LOW | P1 |
+| Slider navigation UI | HIGH | MEDIUM | P2 |
+| Client-side voting system | MEDIUM | MEDIUM | P2 |
+| "Hot" sorting algorithm | MEDIUM | LOW | P2 |
+| Tarot card image generation (SD XL) | HIGH | HIGH | P2 |
+| "Best" and "Newest" sorting | MEDIUM | LOW | P2 |
+| Mystical theme polish | MEDIUM | MEDIUM | P3 |
+| Responsive design optimization | HIGH | MEDIUM | P3 |
+| Performance monitoring | MEDIUM | LOW | P3 |
+| Archive browsing | LOW | MEDIUM | P3 |
+| Multi-language support | LOW | HIGH | P3 |
+
+**Priority key:**
+- P1: Must have for launch
+- P2: Should have, add when possible
+- P3: Nice to have, future consideration
+
+**Rationale:**
+- P1 features enable the core value proposition: detect and display fallacies from Reddit
+- P2 features enhance engagement and differentiator (tarot visuals, voting)
+- P3 features polish experience and expand reach (responsiveness, international)
+
+## Competitor Feature Analysis
+
+| Feature | Competitor A (Reddit bots like RemindMeBot) | Competitor B (Content analysis bots) | Our Approach |
+|---------|--------------|--------------|--------------|
+| Content scraping | ✓ Real-time comment monitoring | ✓ Batch content analysis | ✓ Scheduled 6-hour scraping (balance of rate limits and freshness) |
+| AI/ML analysis | ✗ Rule-based or manual | ✓ Sentiment analysis, toxicity detection | ✓ Logical fallacy detection (10 specific types) with confidence scores |
+| Visual presentation | ✗ Text-only comments | ✓ Dashboards, charts | ✓ Tarot card visualization with mystical theme (unique) |
+| User interaction | ✓ Reply to comments | ✓ Upvote/downvote results | ✓ Slider navigation + Reddit-style voting (novel UX) |
+| Automation | ✓ Continuous streaming | ✓ Scheduled batch jobs | ✓ GitHub Actions scheduled automation (zero-cost) |
+| Cost | Low (cloud) | High (ML infrastructure) | ✓ Zero-cost (free tiers: Reddit API, Hugging Face, GitHub Pages) |
+| Reliability | ✓ Well-tested | Varies | ✓ Comprehensive error handling + fallbacks (placeholder cards) |
+
+**Key differentiators:**
+1. **Visual metaphor:** Tarot cards transform dry logic analysis into engaging experience (no competitor does this)
+2. **Specific fallacy focus:** 10 logical fallacies vs general sentiment/toxicity (more targeted and educational)
+3. **Zero-cost sustainability:** All free tiers; competitors often require cloud infrastructure costs
+4. **Novel UX pattern:** Slider navigation aligns with tarot theme; most bots use list/grid views
 
 ## Sources
 
-- **Your Logical Fallacy Is** (yourlogicalfallacyis.com) - MEDIUM confidence - Direct observation of 24 fallacies with visual icons, linkable pages, downloadable resources (LOW confidence - web-only, no official docs)
-- **Kialo** (kialo.com) - MEDIUM confidence - Direct observation of structured debates, visual tree structure, pro/con organization, voting, tagging (LOW confidence - web-only)
-- **GPTZero** (gptzero.me) - HIGH confidence - Direct observation of AI detector features, sentence-level highlights, color-coded results, export capabilities, integrations, educational resources (MEDIUM confidence - official site with detailed feature descriptions)
-- **Logically Fallacious** (logicallyfallacious.com) - MEDIUM confidence - Direct observation of searchable fallacy library, community archive, featured fallacies (LOW confidence - web-only)
-- **Fallacy Files** (fallacyfiles.org) - MEDIUM confidence - Direct observation of fallacy blog format, glossary, taxonomy, historical perspective (LOW confidence - web-only)
-- **Your Bias Is** (yourbias.is) - LOW confidence - Direct observation of cognitive bias visual library (sister site to fallacy site; similar patterns expected)
-- **PROJECT.md** (project documentation) - HIGH confidence - Explicit project constraints, tech stack, design requirements
+- **PRAW Documentation:** https://praw.readthedocs.io/en/stable/ (Reddit API wrapper, rate limiting, streaming submissions)
+- **Reddit API Documentation:** https://www.reddit.com/dev/api/ (Official API endpoints, rate limit rules)
+- **Hugging Face Transformers:** https://github.com/huggingface/transformers (Pipeline API, text-classification, confidence scores)
+- **Hugging Face Pipelines:** https://huggingface.co/docs/transformers/main_classes/pipelines (text-classification pipeline usage, batch processing)
+- **Web.dev Performance:** https://web.dev/fast/ (Core Web Vitals, LCP, CLS, INP thresholds, image optimization)
+- **MDN Web Performance:** https://developer.mozilla.org/en-US/docs/Web/Performance (Performance fundamentals, lazy loading, critical rendering path)
 
-## Notes on Confidence Levels
-
-- **HIGH:** Official project documentation, authoritative sources
-- **MEDIUM:** Direct observation of competitor features from official websites with multiple feature examples
-- **LOW:** Web-only sources without additional verification, single-source observations
-
-**Gaps in Research:**
-- No access to modern AI reasoning analysis tools (some URLs inaccessible or under construction)
-- Limited data on user expectations for fallacy detection specifically (inferred from related tools)
-- No official studies on what features users value most in fallacy detection tools
-- Limited verification beyond direct website observation (no usage statistics, user reviews, or case studies)
-
-**Research Flags for Phases:**
-- Phase 1 (MVP): Standard web tool patterns - minimal additional research needed
-- Phase 2 (Advanced features): User research recommended for prioritizing export, progress tracking, practice mode
-- Phase 3 (Integrations): Research required for API, LMS integrations (Canvas, Google Classroom)
+---
+*Feature research for: Automated Reddit logical fallacy detection with tarot card visualization*
+*Researched: 2026-03-14*

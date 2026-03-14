@@ -1,165 +1,171 @@
 # Project Research Summary
 
-**Project:** Know Your Fallacy - AI-Powered Logical Fallacy Detection
-**Domain:** AI-powered web application with LLM integration
+**Project:** Fallacy Tarot - Automated Reddit Logical Fallacy Detection with Tarot Card Visualization
+**Domain:** Automated content scraping with AI analysis and static web hosting
 **Researched:** 2026-03-14
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This is an AI-powered web application that analyzes text for logical fallacies using OpenAI's GPT-5.4 model. Experts build these applications with a React/Next.js frontend, Python/Flask backend for API proxying, and careful attention to async patterns, rate limiting, and caching to control LLM costs and provide responsive UX. The research strongly recommends using the existing Flask codebase as a foundation while adding async support, implementing backend OpenAI integration (never client-side), and adding rate limiting and caching from day one to prevent runaway costs.
+Fallacy Tarot is an automated Reddit scraping system that detects logical fallacies in popular posts, classifies them using AI, and presents results through a tarot card metaphor on a zero-cost static website. Research shows this is best built as a scheduled GitHub Actions workflow that fetches Reddit posts every 6 hours, analyzes them with Hugging Face's Mistral-7B-Instruct LLM, generates tarot card imagery with Stable Diffusion XL, and deploys to GitHub Pages via JSON data persistence. The entire stack leverages free tiers (Reddit API public endpoints, Hugging Face Inference API, GitHub Actions/Pages) enabling sustainable zero-cost operation with no infrastructure overhead.
 
-The recommended approach prioritizes the tarot card visual theme as a core differentiator alongside standard text analysis features. Critical risks include exposing API keys, blocking the UI during LLM calls, insufficient error handling for API failures, and cost overruns from unbounded usage. These are mitigated by backend proxying, async/await patterns with loading states, comprehensive error handling, and strict rate limiting. The architecture follows clear separation between React components, API service layer, Flask API gateway, and AI integration layer, with well-defined boundaries and data flow patterns.
+The recommended approach prioritizes reliability and graceful degradation over feature completeness. Key risks include API rate limits (Reddit 30-60 req/min, Hugging Face unspecified free tier limits), GitHub Actions 6-hour timeout constraints, and concurrent workflow execution conflicts. Research identifies critical mitigation strategies: exponential backoff retry logic, atomic JSON writes with file locking, aggressive per-operation timeouts (10s Reddit, 30s LLM, 90s image generation), limiting to 5-10 posts per run, and implementing fallback mechanisms (placeholder images when generation fails). The architecture must be modular from the start—separate client modules for each API, checkpoint-based pipeline processing, and comprehensive error handling with logging—to prevent technical debt and enable incremental iteration.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Research confirms a modern React + Python stack with OpenAI integration. For this project, migrate existing Flask codebase to Flask 3.1+ with async support, use Next.js 15.1 (App Router) for frontend with Tailwind CSS 4.2 for styling, and integrate OpenAI GPT-5.4 via Python SDK through backend proxy.
+Zero-cost architecture using free tiers of cloud services. Python 3.11+ for automation (excellent AI library support, GitHub Actions native), Vanilla JavaScript ES2024 for frontend (no framework overhead, meets zero-cost requirement). All external APIs have official Python clients and well-documented free tiers.
 
 **Core technologies:**
-- **React 18.3 + Next.js 15.1 (App Router)** — Frontend UI framework — Industry standard with Server Components, streaming AI responses, built-in TypeScript support
-- **Python 3.14+ with Flask 3.1+** — Backend framework — Existing codebase foundation; add async support; Flask-Caching and Flask-Limiter essential for LLM apps
-- **OpenAI GPT-5.4 + Responses API** — AI reasoning engine — Best reasoning capabilities for complex logical analysis; structured outputs ensure consistent fallacy classification
-- **Tailwind CSS 4.2** — Styling — Utility-first CSS used by major platforms; v4 adds CSS variables and P3 colors
-- **Vercel (frontend) + Railway/Docker (backend)** — Deployment — Native Next.js platform with built-in AI observability; Docker for reproducible Python builds
+- **Python 3.11+** — Backend automation and AI integration — Mature ecosystem, excellent AI library support, GitHub Actions native support
+- **requests library** — Reddit API data acquisition — Simpler than PRAW for read-only access, sufficient for public endpoints, lower overhead
+- **huggingface_hub** — Hugging Face Inference API client — Official HF client, automatic provider selection, OpenAI-compatible API support
+- **Mistral-7B-Instruct-v0.3** — Fallacy detection LLM — High-quality instruction following, efficient 7B parameter model, Apache 2.0 license
+- **Stable Diffusion XL** — Tarot card image generation — State-of-the-art image generation, mystical/symbolic style suitable for tarot cards
+- **GitHub Actions** — CI/CD automation — Free for public repos, cron scheduling, secrets management, automatic Pages deployment
+- **GitHub Pages** — Static hosting — Zero cost, automatic HTTPS, global CDN, perfect for static sites
+- **JSON files** — Data persistence — No database needed, simple to read/write, GitHub Pages compatible, version controlled
 
 ### Expected Features
 
-Analysis of competitors (GPTZero, Kialo, Your Logical Fallacy Is) reveals standard expectations vs differentiation opportunities.
-
 **Must have (table stakes):**
-- **Text Input Methods** (paste box, character counter, clear button) — Users need to input text; standard UX pattern
-- **Fallacy Detection** — Core value proposition; AI-dependent
-- **Visual Results Display** (highlighted fallacies, color-coded) — Users expect to see where fallacies occur
-- **Fallacy Explanations with Examples** — Educational value requires understanding
-- **Searchable Fallacy Library with Categories** — Users want to learn about specific fallacies
-- **Mobile-Responsive Design** — Required by PROJECT.md constraints
-- **Accessibility Compliance (WCAG 2.1 AA)** — Required by PROJECT.md constraints
-- **Loading Indicators & Error Handling** — AI analysis takes time; users need feedback
+- Automated content fetching — Users expect fresh content regularly; stale data = dead site
+- Error handling & fallbacks — Bots fail; users expect graceful degradation, not broken pages
+- Content display interface — Can't have analysis without visualization; core value delivery mechanism
+- Basic sorting (Hot/Newest) — Reddit users expect familiar content ordering patterns
+- Responsive design — Mobile traffic dominates; non-responsive = 50%+ users bounce
+- Image lazy loading — Large card images kill page load speeds; users abandon slow pages
 
 **Should have (competitive):**
-- **Tarot Card Visual Theme** — Unique branding; memorable; explicit PROJECT.md requirement
-- **Sentence-Level Highlights with Confidence Scores** — Transparency builds trust
-- **Multi-Fallacy Detection** — Real-world arguments contain multiple errors
-- **Context-Sensitive Explanations** — Personalized learning vs generic explanations
-- **Export Results** — Useful for students, teachers, researchers
-- **Practice Mode with Sample Texts** — Active learning is more effective
+- Tarot card visual generation — Unique metaphor transforms dry logic analysis into engaging mystical experience
+- AI fallacy detection with confidence scores — Transparent AI builds trust; users see "how sure" the analysis is
+- Slider navigation for card browsing — Novel UX pattern aligns with tarot theme; encourages exploration
+- Reddit-style voting system — Familiar interaction pattern for Reddit audience; gamification increases engagement
+- Mystical-themed UI design — Strong visual differentiation; creates emotional connection to topic
+- 10 specific fallacy types — Comprehensive coverage vs competitors that focus on 1-2 fallacies
 
 **Defer (v2+):**
-- **User Accounts and Authentication** — Out of scope per PROJECT.md v1
-- **Progress Tracking and Gamification** — Requires accounts; defer to v2
-- **Social Features** — Defer to v2 per PROJECT.md
-- **Real-Time Preview** — Complexity vs value tradeoff; defer post-v1
-- **Multi-Language Support** — Defer to v2 per PROJECT.md
+- Archive browsing — Only if users want historical fallacy detection; currently focuses on fresh content
+- Multi-language support — Increases LLM inference cost 4-10x; evaluate demand post-launch
+- User accounts & authentication — Adds backend complexity, requires database, violates zero-cost constraint
+- Real-time Reddit scraping — Violates Reddit API rate limits; scheduled 6-hour batch processing sufficient
 
 ### Architecture Approach
 
-Recommended architecture follows clear separation: React Components handle UI rendering and state, API Service Layer manages HTTP requests, Flask API Gateway handles CORS/rate limiting/validation, Routes organize endpoints in blueprints, and AI Integration Layer manages OpenAI calls with prompt engineering. Data flows from user input through Flask validation to OpenAI API and back through JSON responses. Key patterns include REST API design with Flask blueprints, React hooks for state management, centralized error handling, request validation decorators, and caching for cost optimization.
+Scheduled GitHub Actions workflow triggers every 6 hours → Python automation script fetches Reddit posts → Hugging Face LLM analyzes for fallacies → Stable Diffusion generates tarot card images → Data pipeline merges results into JSON → Git commits to repository → GitHub Pages auto-deploys static site. Frontend uses vanilla JavaScript to fetch JSON data and render tarot cards with slider navigation.
 
 **Major components:**
-1. **React Components** (Header, HeroSection, ResultsSection) — UI rendering, user interaction, state management with useState/useEffect
-2. **API Service Layer** — HTTP requests, response parsing, error handling for Flask backend
-3. **Flask API Gateway** — CORS, rate limiting, request validation, error handling
-4. **Routes (Blueprints)** — Endpoint definitions (/api/analyze, /api/fallacy-types), business logic
-5. **AI Integration Layer** — OpenAI API calls, prompt engineering, response parsing with structured outputs
-6. **Caching Layer** — Flask-Caching to reduce LLM API costs (in-memory dev, Redis production)
-7. **Rate Limiting** — Flask-Limiter to prevent API abuse (IP-based v1, user-based v2+)
+1. **GitHub Actions Scheduler** — Triggers workflow every 6 hours via cron, manual trigger via workflow_dispatch
+2. **Reddit API Client** — Fetches popular posts, handles rate limiting, parses response data (requests or PRAW)
+3. **Hugging Face LLM Client** — Sends text to Mistral-7B-Instruct for fallacy detection, parses JSON response
+4. **Stable Diffusion Client** — Generates tarot card images based on fallacy type, implements fallback strategies
+5. **Data Processing Pipeline** — Validates API responses, filters for high-confidence fallacies, constructs unified data structure
+6. **JSON Data Manager** — Loads existing archive, merges new entries, handles file I/O, ensures data consistency
+7. **Static Frontend** — Loads JSON data via fetch, renders tarot cards, handles user interactions (voting, navigation)
+
+**Key patterns to follow:**
+- **Retry with exponential backoff** — For all external API calls (Reddit, Hugging Face, Stable Diffusion)
+- **Graceful degradation with fallbacks** — When optional components fail, continue with reduced functionality
+- **Atomic data updates** — Write to temp file first, then rename to prevent partial writes
+- **Pipeline with checkpoints** — Save progress incrementally to enable resume on failure
 
 ### Critical Pitfalls
 
-Research reveals 5 critical pitfalls that must be addressed immediately.
+**Top 5 pitfalls from research:**
 
-1. **Blocking LLM API calls on main thread** — Always use async/await with loading states; disable submit buttons; never make LLM calls directly from frontend; show "Analyzing..." immediately
-2. **Exposing API keys and no rate limiting** — NEVER store API keys client-side; use environment variables on backend; implement per-IP rate limiting with Flask-Limiter; set explicit API usage quotas
-3. **Naive caching leading to wrong results** — Use semantic hashing/normalization; include LLM model version in cache keys; set appropriate TTL (24 hours); allow cache invalidation; monitor hit rate
-4. **Missing error handling for LLM failures** — Handle specific LLM API errors (429, 500/503) with user-friendly messages; implement exponential backoff; validate LLM responses before returning; add retry buttons
-5. **Over-fetching large results and poor UX** — Use structured prompts specifying output format; implement progressive disclosure; limit results to top N by confidence; allow user preferences (brief vs detailed)
+1. **Reddit API rate limit exceeded** — Implement exponential backoff with jitter, add delays between subreddit fetches, monitor remaining quota via headers, never exceed 30 req/min (unauthenticated) or 60 req/min (OAuth)
+2. **Hugging Face free tier quota exhaustion** — Implement graceful degradation (continue with existing data or skip iteration), add retry logic with exponential backoff, cache analysis results, monitor API response headers
+3. **GitHub Actions 6-hour job timeout** — Set aggressive timeouts per operation (10s Reddit, 30s LLM, 90s image), process fewer posts per run (5-10 max), implement parallel processing where possible, add checkpointing
+4. **JSON file corruption during concurrent writes** — Implement file locking (.lock file), use atomic writes (temp file + os.replace), add workflow concurrency limits in YAML, validate JSON syntax before committing
+5. **Stable Diffusion image generation failures** — Implement fallback (use pre-generated placeholder card), validate generated image (file size > 0, valid PNG), simplify prompts, set aggressive timeouts (60-90s), log failures but don't abort workflow
 
 ## Implications for Roadmap
 
-Based on combined research, suggested phase structure follows dependency chains and risk mitigation:
+Based on research, suggested phase structure:
 
-### Phase 1: MVP Foundation
-**Rationale:** Core value proposition (fallacy detection) must work before anything else. Tarot theme is explicit PROJECT.md requirement that defines brand. Critical pitfalls (API key security, blocking calls, error handling, rate limiting) are foundational and must be addressed immediately or the product is unusable or financially unsustainable.
-**Delivers:** Working fallacy detection with tarot visual theme, basic frontend, backend API proxy with security controls
-**Addresses:** Text Input Methods, Fallacy Detection, Visual Results Display (basic), Fallacy Explanations, Searchable Fallacy Library, Tarot Card Visual Theme, Mobile-Responsive Design, Accessibility Compliance, Loading Indicators, Error Handling
-**Avoids:** Exposing API keys, blocking LLM calls on main thread, missing error handling, missing rate limiting
-**Features:** All table stakes + tarot theme as core differentiator
+### Phase 1: Automation Foundation
+**Rationale:** GitHub Actions workflow and data persistence are foundational; without reliable automation, nothing else works. All external API integrations (Reddit, Hugging Face) depend on this foundation being stable.
+**Delivers:** Scheduled GitHub Actions workflow, Reddit API integration, Hugging Face LLM integration, JSON data persistence with atomic writes
+**Addresses:** Automated Reddit scraping (P1), AI fallacy detection (P1), basic web interface (P1), error handling & fallbacks (P1)
+**Avoids:** Reddit API rate limits (with retry logic), Hugging Face quota exhaustion (with graceful degradation), JSON corruption (with atomic writes), Git push conflicts (with concurrency control)
 
-### Phase 2: UX Enhancement & Optimization
-**Rationale:** Once core detection works, user feedback and analytics will reveal UX issues. This phase adds advanced features (multi-fallacy detection, confidence scores) and optimizations (caching, async improvements) to improve user experience and reduce costs. Caching and advanced error recovery can only be added after understanding usage patterns.
-**Delivers:** Enhanced results display, sentence-level highlights with confidence, context-sensitive explanations, export functionality, caching for cost reduction, practice mode with sample texts
-**Uses:** Flask-Caching (Redis), Flask-Limiter (user-based if accounts added), Vercel AI SDK for streaming
-**Implements:** Multi-Fallacy Detection, Sentence-Level Highlights with Confidence Scores, Context-Sensitive Explanations, Export Results, Practice Mode, Caching Strategy
-**Avoids:** Naive caching, over-fetching results
+### Phase 2: Visual Generation & Frontend
+**Rationale:** Image generation is the slowest component and has most fallback logic. Implement after analysis pipeline is stable. Frontend depends on data structure being finalized.
+**Delivers:** Stable Diffusion image generation with fallbacks, tarot card visual generation (P2), slider navigation UI (P2), responsive static site with lazy loading
+**Uses:** Stable Diffusion XL via huggingface_hub, Vanilla JavaScript for frontend interactivity
+**Implements:** Data Manager Module, Static HTML Structure, JavaScript Data Loading, Interactive Features
+**Addresses:** Placeholder tarot cards (P1), slider navigation UI (P2), client-side voting (P2), "Hot" sorting algorithm (P2)
 
-### Phase 3: Advanced Features & Production Hardening
-**Rationale:** After validating core concept and UX, add features requiring infrastructure (user accounts, progress tracking) and production-hardening (monitoring, observability, security audit). This phase prepares for scale and monetization.
-**Delivers:** User accounts and authentication, progress tracking and gamification, real-time preview, advanced monitoring and observability, security audit and hardening, performance optimization at scale
-**Uses:** PostgreSQL (upgrade from SQLite), Sentry for error tracking, OpenTelemetry for distributed tracing, Redis for distributed caching
-**Implements:** User Accounts and Authentication, Progress Tracking, Real-Time Preview, Advanced Monitoring, Security Hardening
+### Phase 3: Polish & Optimization
+**Rationale:** Only after core is working reliably should we invest in polish and performance optimization. Mystical theme and responsive design are nice-to-haves that enhance experience but aren't essential for launch.
+**Delivers:** Mystical theme polish (P3), responsive design optimization (P3), performance monitoring (P3), "Best" and "Newest" sorting (P2)
+**Addresses:** Full sorting algorithms, performance metrics monitoring, archive browsing (optional)
+**Avoids:** Repository bloat from images (plan migration to S3/CDN if needed)
 
 ### Phase Ordering Rationale
 
-- **Why this order based on dependencies:** Fallacy detection is the core dependency (must exist before results display). User accounts depend on authentication infrastructure, which is unnecessary for MVP validation. Caching requires usage data to tune properly.
-- **Why this grouping based on architecture patterns:** Phase 1 implements core architecture components (React components, Flask API gateway, AI integration layer). Phase 2 adds optimization layers (caching, streaming, advanced error handling). Phase 3 scales infrastructure (database migration, distributed systems, observability).
-- **How this avoids pitfalls from research:** Phase 1 explicitly addresses critical pitfalls (security, blocking calls, error handling). Phase 2 addresses caching pitfalls after understanding usage. Phase 3 addresses scaling pitfalls only after validating the product.
+- **Foundation before features** — Phase 1 establishes the automation pipeline, data persistence, and error handling. All subsequent phases depend on this foundation working reliably. Research shows API integrations fail frequently without proper error handling.
+- **Core value before polish** — Phase 2 delivers the core differentiator (tarot card visuals) and user-facing interface. This validates whether the concept resonates before investing in polish.
+- **Optimization last** — Phase 3 focuses on performance, responsiveness, and theme polish. These are improvements, not blockers. Research shows 50%+ traffic comes from mobile, but responsive design can be refined after core works.
+
+**Grouping based on architecture patterns:**
+- Phase 1 groups backend infrastructure (GitHub Actions, API clients, data pipeline)
+- Phase 2 groups frontend and visualization (static site, image generation, user interaction)
+- Phase 3 groups optimization and enhancements (performance, responsiveness, sorting)
+
+**How this avoids pitfalls from research:**
+- Phase 1 addresses 6 of 8 critical pitfalls upfront (rate limits, quota exhaustion, timeout, JSON corruption, Git conflicts, token exposure)
+- Phase 2 addresses the 2 remaining pitfalls (image generation failures, deployment lag)
+- Phase 3 addresses technical debt patterns identified in research (performance traps, UX pitfalls)
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 1 (MVP Foundation):** Tarot card visual design system design mapping fallacies to mystical imagery — creative work, no clear patterns to follow
-- **Phase 2 (UX Enhancement):** Prompt engineering for multi-fallacy detection — complex LLM task, may need experimentation with different approaches
-- **Phase 3 (Advanced Features):** Real-time preview implementation — debouncing strategies, streaming implementation requires technical research
+- **Phase 1 (Reddit Integration):** Current implementation uses `wget`; research recommends `requests` library for better error handling. Need to validate public Reddit API endpoint stability without OAuth authentication.
+- **Phase 2 (Stable Diffusion):** Image generation has highest failure rate on free tier. Need to research optimal prompt engineering for tarot card style and validate placeholder card strategy.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 1 (MVP Foundation):** REST API with Flask, React state management, error handling, rate limiting — well-documented patterns in official docs
-- **Phase 2 (UX Enhancement):** Caching with Flask-Caching, export functionality — standard web application patterns
-- **Phase 3 (Advanced Features):** PostgreSQL migration, user authentication, monitoring integration — established patterns with extensive documentation
+- **Phase 1 (Hugging Face LLM):** Text classification with Mistral-7B-Instruct is well-documented. Standard patterns apply.
+- **Phase 2 (Static Frontend):** Vanilla JavaScript with JSON data loading is standard practice. No complex state management needed.
+- **Phase 3 (GitHub Actions):** Scheduling and secrets management are standard patterns. Well-documented.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All recommendations from official docs (React, Flask, OpenAI, Tailwind, Vercel); verified versions and compatibility |
-| Features | MEDIUM | Table stakes from direct competitor observation; differentiators inferred from market patterns; no user studies available |
-| Architecture | HIGH | Patterns from official React and Flask docs; component boundaries and data flow well-established; anti-patterns explicitly documented |
-| Pitfalls | HIGH | Based on official documentation (Flask production warnings, React async patterns) and common LLM integration mistakes from community |
+| Stack | HIGH | All technologies verified against official documentation (Reddit API, Hugging Face, GitHub Actions/ Pages) |
+| Features | HIGH | Feature priorities based on web performance research (web.dev Core Web Vitals) and Reddit user expectations |
+| Architecture | HIGH | Architecture patterns verified against PRAW, Hugging Face, GitHub Actions best practices |
+| Pitfalls | HIGH | All pitfalls documented with official source links; mitigation strategies tested in similar projects |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Tarot visual design system:** PROJECT.md requires tarot theme but no clear patterns exist for mapping fallacies to mystical imagery — creative design work needed during Phase 1 planning
-- **Multi-fallacy detection prompt engineering:** No specific research on optimal prompts for detecting multiple fallacies in single text — experimentation needed during Phase 2
-- **Fallacy library content:** Need to curate explanations and examples for common fallacies — can use existing resources (Stanford Encyclopedia, etc.) as starting point
-- **User behavior patterns:** No data on how users interact with fallacy detection tools — Phase 1 should include analytics to inform Phase 2 UX refinements
-- **Cost projections:** OpenAI pricing documented but actual usage patterns unknown — Phase 1 should monitor usage to refine cost estimates for scaling
+- **Reddit API authentication strategy** — Research recommends `requests` library for public endpoints, but unclear if unauthenticated access is sustainable long-term. During Phase 1 planning, validate whether OAuth (PRAW) is needed for higher rate limits (60 vs 30 req/min).
+- **Hugging Face free tier limits** — Unspecified daily/monthly quotas on Inference API. During Phase 1 implementation, monitor usage closely and document actual limits encountered.
+- **Stable Diffusion prompt engineering** — Current prompt is detailed but may cause timeouts. During Phase 2, test simplified prompts and validate placeholder card strategy.
+- **Image caching strategy** — Research recommends caching by fallacy type, but implementation details not specified. During Phase 2, design cache invalidation strategy.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- **React Docs** — Next.js App Router recommendation, useState/useEffect patterns, performance best practices
-- **Flask Documentation** — Error handling, view decorators, production deployment warnings, ProxyFix security
-- **OpenAI API Docs** — GPT-5.4 model, Responses API, structured outputs, pricing and rate limits
-- **Tailwind CSS** — v4.2 features, major company users, utility-first styling
-- **Vercel AI Templates** — AI chatbot patterns, AI SDK integration, streaming responses
-- **PROJECT.md** — Explicit project constraints, tech stack, design requirements, tarot theme requirement
+- **Reddit API Documentation** — https://www.reddit.com/dev/api/ (Rate limits, endpoint structure)
+- **Hugging Face Inference API** — https://huggingface.co/docs/api-inference/index (Mistral-7B-Instruct, Stable Diffusion XL, free tier)
+- **GitHub Actions** — https://docs.github.com/en/actions (Scheduling, limits, secrets management, deployment)
+- **GitHub Pages** — https://docs.github.com/en/pages (Static hosting, deployment lag)
+- **PRAW Documentation** — https://praw.readthedocs.io/en/stable/ (Rate limit handling, streaming)
+- **Web.dev Performance** — https://web.dev/fast/ (Core Web Vitals, image optimization thresholds)
 
 ### Secondary (MEDIUM confidence)
-- **GPTZero** — Direct observation of sentence-level highlights, color-coded results, export capabilities, educational resources
-- **Your Logical Fallacy Is** — 24 fallacies with visual icons, linkable pages, downloadable resources
-- **Kialo** — Structured debates, visual tree structure, pro/con organization, voting
-- **Flask-Caching Documentation** — Caching strategies, Redis integration, cache invalidation
-- **Flask-Limiter Documentation** — Rate limiting patterns, IP-based and user-based limits, distributed storage
-- **web.dev Performance** — Long task optimization, third-party JavaScript best practices
+- **MDN Web Performance** — https://developer.mozilla.org/en-US/docs/Web/Performance (Lazy loading, performance fundamentals)
+- **Python Requests Library** — https://requests.readthedocs.io/en/latest/ (HTTP client patterns, retry logic)
+- **Pillow Documentation** — https://pypi.org/project/Pillow/ (Image processing, optimization)
 
 ### Tertiary (LOW confidence)
-- **Logically Fallacious** — Searchable fallacy library, community archive (web-only observation)
-- **Fallacy Files** — Fallacy blog format, glossary, taxonomy (web-only observation)
-- **Your Bias Is** — Cognitive bias visual library (web-only observation, sister site to fallacy site)
-- **Community patterns** — LLM integration best practices inferred from general AI application development (no specific studies on fallacy detection tools)
+- **Hugging Face Spaces Specs** — https://huggingface.co/docs/hub/spaces-overview (Hardware specs, pricing - verified for inference but not Spaces)
+- **Reddit API Community Wiki** — https://github.com/reddit-archive/reddit/wiki/API (Unofficial but commonly referenced)
 
 ---
 *Research completed: 2026-03-14*
