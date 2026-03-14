@@ -25,8 +25,8 @@ jobs:
       
       - name: Fetch Reddit JSON data
         run: |
-          # Subreddit listesi
-          subreddits=("fallacy" "worldnews" "philosophy" "funny" "science" "todayilearned" "changemyview")
+          # Subreddit listesi - worldnews öncelikli
+          subreddits=("worldnews" "fallacy" "philosophy" "funny" "science" "todayilearned" "changemyview")
           
           # Veri klasörünü oluştur
           mkdir -p data

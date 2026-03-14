@@ -24,8 +24,8 @@ DATA_FILE = os.path.join(OUTPUT_DIR, "fallacies.json")
 TEMP_JSON_PATH = "/tmp/reddit_data.json"
 DATA_DIR = "data"  # GitHub Actions tarafından indirilen verilerin klasörü
 
-# Subreddit listesi - sırayla denenir
-SUBREDDITS = ["fallacy", "worldnews", "philosophy", "funny", "science", "todayilearned", "changemyview"]
+# Subreddit listesi - worldnews öncelikli, sırayla denenir
+SUBREDDITS = ["worldnews", "fallacy", "philosophy", "funny", "science", "todayilearned", "changemyview"]
 
 # Mantık Hatası Türleri ve Sabit Tarot Promptları
 # Tema, aspect ratio ve stil sabittir, sadece konu değişir.
