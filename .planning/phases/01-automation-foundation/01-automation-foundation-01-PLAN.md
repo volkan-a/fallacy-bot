@@ -8,7 +8,7 @@ files_modified: [.github/workflows/fallacy_automation.yml, scripts/main.py]
 autonomous: true
 requirements: [GHA-01, GHA-02, GHA-06, GHA-07, SEC-05]
 
-  must_haves:
+must_haves:
   truths:
     - "GitHub Actions workflow runs automatically every 6 hours on cron schedule"
     - "Workflow concurrency group prevents parallel runs from conflicting"

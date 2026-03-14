@@ -9,6 +9,10 @@ import sys
 import json
 import logging
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file for local testing
+load_dotenv()
 
 # Add scripts directory to path so we can import from it when run from root
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -53,7 +57,8 @@ def main():
     try:
         # Step 1: Fetch Reddit posts
         logger.info("Step 1: Fetching Reddit posts...")
-        posts = fetch_reddit_posts(limit=10)
+        posts = fetch_reddit_posts(limit=5)  # Canlı test için 5 gönderi çekiyoruz
+        logger.info(f"Fetched {len(posts)} posts")
         logger.info(f"Fetched {len(posts)} posts")
 
         if not posts:

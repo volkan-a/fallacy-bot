@@ -1,9 +1,28 @@
 {
-  "entries": [],
+  "entries": [
+    {
+      "post_id": "test_fallacy_001",
+      "title": "Mistik Tarot Test Gönderisi",
+      "content": "Senin söylediklerin yanlış, çünkü sen bir bot'sun ve botlar asla doğru söyleyemez!",
+      "source_url": "https://reddit.com/r/test",
+      "author": "test_user",
+      "reddit_score": 50,
+      "subreddit": "philosophy",
+      "fallacy_type": "Ad Hominem",
+      "confidence_score": 0.95,
+      "confidence_level": "High",
+      "explanation": "Bu, argümana değil, kişiye (veya bu durumda robota) saldıran bir mantık hatasıdır. Karşıdakinin bot olması, söylediklerinin doğruluğunu teknik olarak değiştirmez.",
+      "quote": "Senin söylediklerin yanlış, çünkü sen bir bot'sun",
+      "image_url": "assets/placeholders/fallback_card.svg",
+      "timestamp": "2026-03-14T10:00:00",
+      "upvotes": 10,
+      "downvotes": 2
+    }
+  ],
   "metadata": {
     "version": "1.0",
-    "created_at": "2026-03-14T00:00:00",
-    "last_updated": "2026-03-14T00:00:00",
-    "total_entries": 0
+    "created_at": "2026-03-14T09:00:00",
+    "last_updated": "2026-03-14T10:00:00",
+    "total_entries": 1
   }
 }
