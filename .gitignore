@@ -1,4 +1,4 @@
-```
-# CI/CD
-.github/
+```yaml
+# GitHub workflow files are typically not ignored
+# No additional ignores needed for this change set
 ```
