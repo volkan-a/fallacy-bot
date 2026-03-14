@@ -56,9 +56,10 @@ jobs:
           echo "Raw JSON files saved in data/ directory."
 
       - name: Run Fallacy Analysis
-        timeout-minutes: 5
+        timeout-minutes: 15
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          SD_TOKEN: ${{ secrets.SD_TOKEN || secrets.HF_TOKEN }}
         run: |
           python scripts/main.py
 

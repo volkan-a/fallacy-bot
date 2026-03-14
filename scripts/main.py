@@ -30,12 +30,14 @@ try:
     from scripts.reddit_client import fetch_reddit_posts
     from scripts.hf_client import analyze_fallacy
     from scripts.data_manager import DataManager
+    from scripts.image_generator import generate_card_for_fallacy
 except ImportError as e:
     try:
         # Try local imports if running from inside scripts/
         from reddit_client import fetch_reddit_posts
         from hf_client import analyze_fallacy
         from data_manager import DataManager
+        from image_generator import generate_card_for_fallacy
     except ImportError as e2:
         logger.error(f"Failed to import client modules: {e} / {e2}")
         logger.info("Please ensure all client modules are implemented")
@@ -68,6 +70,16 @@ def main():
                 analysis = analyze_fallacy(post["content"])
 
                 if analysis and analysis.get("has_fallacy"):
+                    logger.info(
+                        f"  → Detected: {analysis['fallacy_type']} (confidence: {analysis['confidence']:.2f})"
+                    )
+
+                    # Generate tarot card image
+                    logger.info(
+                        f"  → Generating tarot card image for {analysis['fallacy_type']}..."
+                    )
+                    image_path = generate_card_for_fallacy(analysis["fallacy_type"])
+
                     # Format entry according to AUTO-05 requirements
                     entry = {
                         "post_id": post["id"],
@@ -82,14 +94,12 @@ def main():
                         "confidence_level": analysis.get("confidence_level", "Medium"),
                         "explanation": analysis["explanation"],
                         "quote": analysis["quote"],
+                        "image_url": image_path,
                         "timestamp": datetime.now().isoformat(),
                         "upvotes": 0,
                         "downvotes": 0,
                     }
                     analyzed_posts.append(entry)
-                    logger.info(
-                        f"  → Detected: {analysis['fallacy_type']} (confidence: {analysis['confidence']:.2f})"
-                    )
                 else:
                     logger.info(f"  → No fallacy detected")
 
