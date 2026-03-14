@@ -76,12 +76,13 @@ jobs:
           git add data/ docs/data/ docs/assets/ output_images/ generated_cards/ || true
 
           if git diff --staged --quiet; then
-            echo "No changes to commit"
+            echo "No changes to commit, skipping."
           else
             echo "Changes detected, committing and pushing..."
             git commit -m "Auto-update: New fallacy cards generated [skip ci]"
             git push origin main
           fi
+          exit 0
 
             git commit -m "Auto-update: New fallacy cards generated [skip ci]"
             git push origin main
