@@ -1,0 +1,49 @@
+name: Fallacy Tarot Automation
+
+on:
+  schedule:
+    # Her 6 saatte bir çalışır (Günde 4 kez) - UTC zaman diliminde
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Manuel olarak da tetiklenebilir
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  analyze-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pillow huggingface_hub python-dotenv
+
+      - name: Run Fallacy Analysis and Image Generation
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python src/fallacy_analyzer.py
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

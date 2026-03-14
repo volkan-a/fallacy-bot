@@ -1,425 +1,381 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fallacy Hunter - Tarot Archive</title>
+    <title>Fallacy Tarot - Mistik Mantık Analizi</title>
     <style>
         :root {
-            --bg-color: #0f0f13;
-            --card-bg: #1a1a24;
-            --text-main: #e0e0e0;
-            --text-muted: #a0a0a0;
-            --accent: #d4af37; /* Gold */
-            --border: #333;
+            --bg-dark: #0f0518;
+            --bg-card: #1a0a2e;
+            --gold: #d4af37;
+            --gold-light: #f4cf57;
+            --purple: #6b2c91;
+            --text: #e8dff5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: 'Georgia', serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background: linear-gradient(135deg, var(--bg-dark), #2d1b4e);
+            color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
         header {
             text-align: center;
-            padding: 2rem;
-            border-bottom: 1px solid var(--border);
-            width: 100%;
-            max-width: 800px;
+            padding: 40px 0;
+            border-bottom: 2px solid var(--gold);
+            margin-bottom: 30px;
         }
 
         h1 {
-            color: var(--accent);
-            margin: 0;
-            font-size: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            font-size: 3em;
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            margin-bottom: 10px;
         }
 
         .subtitle {
-            color: var(--text-muted);
             font-style: italic;
-            margin-top: 0.5rem;
+            opacity: 0.8;
+            font-size: 1.2em;
         }
 
-        /* Navigation / Sorting */
-        .controls {
+        .nav-tabs {
             display: flex;
-            gap: 1rem;
-            margin: 1.5rem 0;
-            flex-wrap: wrap;
             justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        button {
+        .tab-btn {
             background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 0.5rem 1rem;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 12px 30px;
+            font-size: 1.1em;
             cursor: pointer;
-            font-family: inherit;
-            text-transform: uppercase;
             transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
         }
 
-        button:hover, button.active {
-            background: var(--accent);
-            color: var(--bg-color);
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--gold);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
         }
 
-        /* Slider Container */
         .slider-container {
             position: relative;
-            width: 90%;
-            max-width: 600px;
-            height: 700px;
             overflow: hidden;
-            margin: 1rem auto;
-            perspective: 1000px;
+            padding: 20px 0;
         }
 
-        .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s ease;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateX(100%) scale(0.9);
+        .card {
+            min-width: 100%;
+            padding: 20px;
         }
 
-        .slide.active {
-            opacity: 1;
-            pointer-events: all;
-            transform: translateX(0) scale(1);
-            z-index: 2;
-        }
-
-        .slide.prev {
-            transform: translateX(-50%) scale(0.8);
-            opacity: 0.5;
-            z-index: 1;
-            filter: blur(2px);
-        }
-
-        .slide.next {
-            transform: translateX(50%) scale(0.8);
-            opacity: 0.5;
-            z-index: 1;
-            filter: blur(2px);
-        }
-
-        /* Card Styling */
-        .tarot-card-wrapper {
-            background: var(--card-bg);
-            border: 2px solid var(--accent);
-            border-radius: 10px;
-            padding: 1rem;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-            text-align: center;
-            max-width: 100%;
+        .tarot-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(26, 10, 46, 0.8);
+            border: 3px solid var(--gold);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(107, 44, 145, 0.4);
         }
 
         .tarot-image {
+            text-align: center;
+        }
+
+        .tarot-image img {
             max-width: 100%;
             height: auto;
-            border-radius: 5px;
-            border: 1px solid #333;
+            border: 2px solid var(--gold);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .fallacy-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .fallacy-title {
-            color: var(--accent);
-            font-size: 1.5rem;
-            margin: 1rem 0 0.5rem;
+            font-size: 2em;
+            color: var(--gold);
+            margin-bottom: 15px;
+            text-align: center;
         }
 
-        .fallacy-name {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
+        .original-post {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--purple);
         }
 
-        .content-text {
-            background: #000;
-            padding: 1rem;
-            border-radius: 5px;
+        .post-title {
+            font-weight: bold;
+            color: var(--gold-light);
+            margin-bottom: 8px;
+        }
+
+        .post-text {
+            line-height: 1.6;
             font-style: italic;
-            margin: 1rem 0;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            max-height: 150px;
-            overflow-y: auto;
-            text-align: left;
         }
 
         .explanation {
-            font-size: 0.9rem;
-            color: #ccc;
-            margin-bottom: 1rem;
-            text-align: left;
-            background: rgba(255,255,255,0.05);
-            padding: 0.5rem;
-            border-radius: 4px;
+            background: rgba(212, 175, 55, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--gold);
         }
 
-        .meta-info {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 0.5rem;
+        .explanation h3 {
+            color: var(--gold);
+            margin-bottom: 10px;
         }
 
-        .meta-info a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        /* Voting */
-        .voting {
+        .vote-section {
             display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
             justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
         }
 
         .vote-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 10px 25px;
+            font-size: 1.2em;
             cursor: pointer;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
+            transition: all 0.3s ease;
         }
 
         .vote-btn:hover {
-            color: var(--accent);
+            background: var(--gold);
+            color: var(--bg-dark);
         }
 
         .vote-count {
+            font-size: 1.3em;
             font-weight: bold;
-            color: var(--text-main);
         }
 
-        /* Navigation Arrows */
-        .nav-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
+        .nav-arrows {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .arrow-btn {
+            background: var(--gold);
             border: none;
-            color: white;
-            font-size: 2rem;
-            padding: 1rem;
-            cursor: pointer;
-            z-index: 10;
-            border-radius: 50%;
             width: 50px;
             height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .nav-arrow:hover {
-            background: var(--accent);
-            color: black;
+        .arrow-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
         }
 
-        .prev-btn { left: 10px; }
-        .next-btn { right: 10px; }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5em;
+            color: var(--gold);
+        }
 
-        @media (max-width: 600px) {
-            .slider-container { height: 800px; }
-            h1 { font-size: 1.8rem; }
+        @media (max-width: 768px) {
+            .tarot-display {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>🔮 Fallacy Tarot 🔮</h1>
+            <p class="subtitle">Mistik dünyada mantık hatalarını keşfet</p>
+        </header>
 
-<header>
-    <h1>Fallacy Hunter</h1>
-    <div class="subtitle">Mystical Archive of Logical Errors</div>
-</header>
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="filterBy('new')">Yeni</button>
+            <button class="tab-btn" onclick="filterBy('hot')">Sıcak</button>
+            <button class="tab-btn" onclick="filterBy('best')">En İyi</button>
+        </div>
 
-<div class="controls">
-    <button onclick="setSort('new')" id="btn-new" class="active">Newest</button>
-    <button onclick="setSort('hot')" id="btn-hot">Hot (Score)</button>
-    <button onclick="setSort('best')" id="btn-best">Best (Confidence)</button>
-</div>
+        <div id="content" class="slider-container">
+            <div class="loading">Veriler yükleniyor...</div>
+        </div>
 
-<div class="slider-container">
-    <button class="nav-arrow prev-btn" onclick="changeSlide(-1)">&#10094;</button>
-    
-    <div id="slides-wrapper">
-        <!-- Slides will be injected here -->
+        <div class="nav-arrows">
+            <button class="arrow-btn" onclick="prevCard()">❮</button>
+            <button class="arrow-btn" onclick="nextCard()">❯</button>
+        </div>
     </div>
 
-    <button class="nav-arrow next-btn" onclick="changeSlide(1)">&#10095;</button>
-</div>
+    <script>
+        let fallacies = [];
+        let filteredFallacies = [];
+        let currentIndex = 0;
 
-<script>
-    let archiveData = [];
-    let currentSort = 'new';
-    let currentIndex = 0;
-
-    // Fetch data from local JSON file (generated by Python script)
-    async function loadData() {
-        try {
-            const response = await fetch('data/archive.json');
-            if (!response.ok) throw new Error("Archive not found");
-            archiveData = await response.json();
-            renderSlides();
-        } catch (error) {
-            console.error("Error loading archive:", error);
-            document.getElementById('slides-wrapper').innerHTML = '<p style="text-align:center; color:#666;">No fallacies found yet. Wait for the next automation run.</p>';
+        async function loadFallacies() {
+            try {
+                const response = await fetch('data/fallacies.json');
+                fallacies = await response.json();
+                filterBy('new');
+            } catch (error) {
+                document.getElementById('content').innerHTML = 
+                    '<div class="loading">Veri yüklenemedi. Lütfen daha sonra tekrar deneyin.</div>';
+                console.error('Error loading fallacies:', error);
+            }
         }
-    }
 
-    function sortData() {
-        if (currentSort === 'new') {
-            // Already sorted by insertion order (newest first) in Python
-            return [...archiveData];
-        } else if (currentSort === 'hot') {
-            // Sort by Reddit Score + Votes
-            return [...archiveData].sort((a, b) => {
-                const scoreA = (a.post_score || 0) + (a.votes.up - a.votes.down);
-                const scoreB = (b.post_score || 0) + (b.votes.up - b.votes.down);
-                return scoreB - scoreA;
+        function filterBy(category) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(
+                    category === 'new' ? 'yeni' : 
+                    category === 'hot' ? 'sıcak' : 'en iyi'
+                )) {
+                    btn.classList.add('active');
+                }
             });
-        } else if (currentSort === 'best') {
-            // Sort by Confidence
-            return [...archiveData].sort((a, b) => b.confidence - a.confidence);
+
+            if (category === 'new') {
+                filteredFallacies = [...fallacies].sort((a, b) => b.timestamp - a.timestamp);
+            } else if (category === 'hot') {
+                filteredFallacies = fallacies.filter(f => f.category === 'hot' || f.category === 'best');
+            } else if (category === 'best') {
+                filteredFallacies = fallacies.filter(f => f.category === 'best')
+                    .sort((a, b) => (b.votes.up - b.votes.down) - (a.votes.up - a.votes.down));
+            }
+
+            currentIndex = 0;
+            renderCard();
         }
-        return archiveData;
-    }
 
-    function setSort(type) {
-        currentSort = type;
-        document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
-        document.getElementById(`btn-${type}`).classList.add('active');
-        currentIndex = 0;
-        renderSlides();
-    }
+        function renderCard() {
+            const container = document.getElementById('content');
+            
+            if (filteredFallacies.length === 0) {
+                container.innerHTML = '<div class="loading">Bu kategoride veri bulunamadı.</div>';
+                return;
+            }
 
-    function renderSlides() {
-        const sorted = sortData();
-        const wrapper = document.getElementById('slides-wrapper');
-        wrapper.innerHTML = '';
+            const item = filteredFallacies[currentIndex];
+            const voteScore = item.votes.up - item.votes.down;
 
-        if (sorted.length === 0) return;
+            container.innerHTML = `
+                <div class="card">
+                    <div class="tarot-display">
+                        <div class="tarot-image">
+                            <img src="${item.image}" alt="${item.fallacy.type} Tarot Kartı">
+                        </div>
+                        <div class="fallacy-info">
+                            <h2 class="fallacy-title">${item.fallacy.type}</h2>
+                            
+                            <div class="original-post">
+                                <div class="post-title">📜 Orijinal Gönderi</div>
+                                <div class="post-title" style="font-size: 0.9em; margin-bottom: 5px;">
+                                    ${item.original_post.title}
+                                </div>
+                                <div class="post-text">"${item.original_post.text}"</div>
+                                <div style="margin-top: 10px; font-size: 0.8em; opacity: 0.7;">
+                                    u/${item.original_post.author} • ⭐ ${item.original_post.score} puan
+                                </div>
+                            </div>
 
-        sorted.forEach((item, index) => {
-            const slide = document.createElement('div');
-            slide.className = 'slide';
-            if (index === currentIndex) slide.classList.add('active');
-            if (index === currentIndex - 1) slide.classList.add('prev');
-            if (index === currentIndex + 1) slide.classList.add('next');
+                            <div class="explanation">
+                                <h3>🔍 Mantık Hatası Açıklaması</h3>
+                                <p>${item.fallacy.explanation}</p>
+                                ${item.fallacy.quote ? `<p style="margin-top: 10px; font-style: italic;">"${item.fallacy.quote}"</p>` : ''}
+                                <p style="margin-top: 10px; font-size: 0.9em;">Güven: ${(item.fallacy.confidence * 100).toFixed(0)}%</p>
+                            </div>
 
-            slide.innerHTML = `
-                <div class="tarot-card-wrapper">
-                    <img src="${item.card_image}" alt="${item.fallacy}" class="tarot-image">
-                    <h2 class="fallacy-title">${getTarotName(item.fallacy)}</h2>
-                    <div class="fallacy-name">${item.fallacy}</div>
-                    
-                    <div class="content-text">"${escapeHtml(item.content)}"</div>
-                    
-                    <div class="explanation">
-                        <strong>Analysis:</strong> ${item.explanation}
-                    </div>
-
-                    <div class="meta-info">
-                        Source: <a href="${item.post_url}" target="_blank">Reddit</a> | 
-                        Score: ${item.post_score} | 
-                        Date: ${new Date(item.timestamp).toLocaleDateString()}
-                    </div>
-
-                    <div class="voting">
-                        <button class="vote-btn" onclick="vote(${item.id}, 'up')">
-                            &#9650; <span class="vote-count" id="up-${item.id}">${item.votes.up}</span>
-                        </button>
-                        <button class="vote-btn" onclick="vote(${item.id}, 'down')">
-                            &#9660; <span class="vote-count" id="down-${item.id}">${item.votes.down}</span>
-                        </button>
+                            <div class="vote-section">
+                                <button class="vote-btn" onclick="vote('${item.id}', 'up')">⬆️ (${item.votes.up})</button>
+                                <span class="vote-count">${voteScore > 0 ? '+' : ''}${voteScore}</span>
+                                <button class="vote-btn" onclick="vote('${item.id}', 'down')">⬇️ (${item.votes.down})</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
-            wrapper.appendChild(slide);
-        });
-    }
-
-    function changeSlide(direction) {
-        const sorted = sortData();
-        if (sorted.length === 0) return;
-
-        const newIndex = currentIndex + direction;
-        if (newIndex >= 0 && newIndex < sorted.length) {
-            currentIndex = newIndex;
-            renderSlides();
         }
-    }
 
-    // Helper to map fallacy to Tarot Name (must match Python logic roughly)
-    function getTarotName(fallacy) {
-        const mapping = {
-            "Ad Hominem": "The Betrayer",
-            "Straw Man": "The Illusionist",
-            "Appeal to Authority": "The High Priest",
-            "False Dilemma": "The Forked Path",
-            "Slippery Slope": "The Avalanche",
-            "Circular Reasoning": "The Ouroboros",
-            "Hasty Generalization": "The Blind Seer",
-            "Red Herring": "The Distractor",
-            "Tu Quoque": "The Mirror",
-            "No True Scotsman": "The Gatekeeper"
-        };
-        return mapping[fallacy] || "The Unknown";
-    }
-
-    function escapeHtml(text) {
-        if (!text) return "";
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-
-    // Mock voting (since static site can't persist without backend/API)
-    // In a real scenario, this would call an API or use LocalStorage
-    function vote(id, type) {
-        const item = archiveData.find(i => i.id === id);
-        if (item) {
-            if (type === 'up') item.votes.up++;
-            else item.votes.down++;
-            
-            // Update UI locally
-            document.getElementById(`${type}-${id}`).innerText = item.votes[type];
-            
-            // Note: Changes won't persist to GitHub repo automatically from client-side JS
-            // This requires a backend or GitHub API integration which is complex for static sites
-            alert("Vote recorded locally! (Note: Static site cannot save votes permanently without a backend)");
+        function nextCard() {
+            if (currentIndex < filteredFallacies.length - 1) {
+                currentIndex++;
+                renderCard();
+            }
         }
-    }
 
-    // Initialize
-    loadData();
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCard();
+            }
+        }
 
-</script>
+        function vote(id, type) {
+            const item = fallacies.find(f => f.id === id);
+            if (item) {
+                if (type === 'up') {
+                    item.votes.up++;
+                } else {
+                    item.votes.down++;
+                }
+                
+                const score = item.votes.up - item.votes.down;
+                const ageHours = (Date.now() / 1000 - item.timestamp) / 3600;
+                
+                if (ageHours < 24 && score > 2) {
+                    item.category = 'hot';
+                } else if (score > 5) {
+                    item.category = 'best';
+                }
+                
+                renderCard();
+                localStorage.setItem('fallacies', JSON.stringify(fallacies));
+            }
+        }
 
+        window.onload = loadFallacies;
+    </script>
 </body>
 </html>
