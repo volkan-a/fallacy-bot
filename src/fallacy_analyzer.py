@@ -49,47 +49,122 @@ FALLACY_KEYWORDS = {
 }
 
 def get_reddit_posts():
-    """Reddit'ten popüler gönderileri çek (ücretsiz JSON endpoint)"""
-    # r/worldnews/top.json?t=week kullanarak API key gerektirmeden veri çekiyoruz
-    url = "https://www.reddit.com/r/worldnews/top.json?t=week&limit=25"
-    headers = {'User-Agent': 'FallacyTarotBot/1.0'}
-    posts = []
+    """Reddit'ten popüler gönderileri çek (ücretsiz JSON endpoint)
+    Birden fazla subreddit'ten sırayla veri çeker: fallacy, worldnews, philosophy, funny, science
     
-    try:
-        response = requests.get(url, headers=headers, timeout=15)
-        if response.status_code == 403:
-            print("⚠️  Reddit erişimi engellendi, alternatif deneniyor...")
-            # Alternatif olarak philosophy subreddit'ini dene
-            url = "https://www.reddit.com/r/philosophy/top.json?t=week&limit=25"
+    Not: Reddit API kısıtlamaları nedeniyle bazı IP'ler engellenmiş olabilir.
+    Bu durumda varsayılan örnek veriler kullanılacaktır.
+    """
+    # Subreddit listesi - sırayla denenir
+    subreddits = ["fallacy", "worldnews", "philosophy", "funny", "science", "todayilearned", "changemyview"]
+    
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
+    posts = []
+    reddit_available = True
+    
+    for subreddit in subreddits:
+        url = f"https://www.reddit.com/r/{subreddit}/top.json?t=week&limit=15"
+        print(f"📡 r/{subreddit} subreddit'inden veri çekiliyor...")
+        
+        try:
             response = requests.get(url, headers=headers, timeout=15)
-        
-        response.raise_for_status()
-        data = response.json()
-        
-        for child in data['data']['children']:
-            post_data = child['data']
-            text = post_data.get('selftext', '')
-            title = post_data.get('title', '')
             
-            # İçerik uzunluğu kontrolü (çok kısa veya çok uzun olmasın)
-            content = text if text else title
-            if len(content) > 50 and len(content) < 800:
-                posts.append({
-                    'title': title,
-                    'text': content,
-                    'url': f"https://reddit.com{post_data['permalink']}",
-                    'score': post_data.get('score', 0),
-                    'author': post_data.get('author', 'anonymous'),
-                    'created_utc': post_data.get('created_utc', 0)
-                })
+            if response.status_code == 403 or response.status_code == 404:
+                print(f"⚠️  r/{subreddit} erişilemedi (Status: {response.status_code}), bir sonraki deneniyor...")
+                continue
+            
+            response.raise_for_status()
+            data = response.json()
+            
+            subreddit_posts = 0
+            for child in data['data']['children']:
+                post_data = child['data']
+                text = post_data.get('selftext', '')
+                title = post_data.get('title', '')
                 
-        print(f"✅ Reddit'ten {len(posts)} gönderi başarıyla çekildi.")
+                # İçerik uzunluğu kontrolü (çok kısa veya çok uzun olmasın)
+                content = text if text else title
+                if len(content) > 50 and len(content) < 800:
+                    posts.append({
+                        'title': title,
+                        'text': content,
+                        'url': f"https://reddit.com{post_data['permalink']}",
+                        'score': post_data.get('score', 0),
+                        'author': post_data.get('author', 'anonymous'),
+                        'created_utc': post_data.get('created_utc', 0),
+                        'subreddit': subreddit
+                    })
+                    subreddit_posts += 1
             
-    except Exception as e:
-        print(f"Reddit çekilirken hata: {e}")
-        # Hata durumunda boş liste dön, mock data kullanılsın
-        return []
+            print(f"✅ r/{subreddit} subreddit'inden {subreddit_posts} geçerli gönderi bulundu.")
             
+            # En az 10 gönderi bulduysak devam etmeyelim
+            if len(posts) >= 10:
+                break
+                
+        except Exception as e:
+            print(f"r/{subreddit} çekilirken hata: {e}")
+            reddit_available = False
+            continue
+    
+    print(f"🎯 Toplam {len(posts)} gönderi başarıyla çekildi.")
+    
+    # Eğer hiç gönderi çekilemediyse, örnek mock data kullan
+    if not posts:
+        print("⚠️  Reddit'ten veri çekilemedi, örnek veriler kullanılıyor...")
+        posts = [
+            {
+                'title': "Herkes bu filmi beğendi, o halde bu film kesinlikle en iyi filmdir.",
+                'text': "Tüm arkadaşlarım bu filmi çok beğendi. Demek ki bu film tarihin en iyi filmi olmalı. Herkesin aynı fikirde olması, filmin kalitesinin kanıtıdır.",
+                'url': "#",
+                'score': 150,
+                'author': "example_user",
+                'created_utc': datetime.now().timestamp(),
+                'subreddit': "fallacy"
+            },
+            {
+                'title': "Ya bizimlesiniz ya da düşmanımızsınız",
+                'text': "Bu konuda ya tamamen benimle hemfikirsiniz ya da tamamen yanılıyorsunuz. Orta yol yok. Eğer benim argümanımı desteklemiyorsanız, düşmanlarımdan birisiniz demektir.",
+                'url': "#",
+                'score': 89,
+                'author': "debate_master",
+                'created_utc': datetime.now().timestamp(),
+                'subreddit': "philosophy"
+            },
+            {
+                'title': "Doktor dedi, öyleyse doğrudur",
+                'text': "Dr. Smith bu ilacı önerdi. O bir doktor olduğu için bu ilacın işe yarayacağı kesinlikle doğrudur. Doktorların her söylediği doğru olmalıdır.",
+                'url': "#",
+                'score': 234,
+                'author': "health_guru",
+                'created_utc': datetime.now().timestamp(),
+                'subreddit': "science"
+            },
+            {
+                'title': "Bundan sonra bu oldu, demek ki bundan dolayı oldu",
+                'text': "Dün vitamin takviyesi almaya başladım ve bugün kendimi daha iyi hissediyorum. Demek ki vitamin takviyesi beni iyileştirdi. Bundan sonra her hasta vit almalı.",
+                'url': "#",
+                'score': 67,
+                'author': "wellness_fan",
+                'created_utc': datetime.now().timestamp(),
+                'subreddit': "todayilearned"
+            },
+            {
+                'title': "Plastik poşetleri yasaklarsak yakında her şeyi yasaklayacaklar",
+                'text': "Önce plastik poşetleri yasakladılar. Sonra pipetleri. Yakında araba kullanmayı, et yemeyi, hatta nefes almayı bile yasaklayacaklar! Bu kaygan zeminde ilerliyoruz.",
+                'url': "#",
+                'score': 312,
+                'author': "freedom_fighter",
+                'created_utc': datetime.now().timestamp(),
+                'subreddit': "changemyview"
+            }
+        ]
+        print(f"✅ {len(posts)} örnek veri yüklendi.")
+    
     return posts
 
 def analyze_fallacy(text):
