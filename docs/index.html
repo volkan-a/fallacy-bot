@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fallacy Hunter - Tarot Archive</title>
+    <style>
+        :root {
+            --bg-color: #0f0f13;
+            --card-bg: #1a1a24;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --accent: #d4af37; /* Gold */
+            --border: #333;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem;
+            border-bottom: 1px solid var(--border);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            color: var(--accent);
+            margin: 0;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        /* Navigation / Sorting */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        button:hover, button.active {
+            background: var(--accent);
+            color: var(--bg-color);
+        }
+
+        /* Slider Container */
+        .slider-container {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            height: 700px;
+            overflow: hidden;
+            margin: 1rem auto;
+            perspective: 1000px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s ease;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(100%) scale(0.9);
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateX(0) scale(1);
+            z-index: 2;
+        }
+
+        .slide.prev {
+            transform: translateX(-50%) scale(0.8);
+            opacity: 0.5;
+            z-index: 1;
+            filter: blur(2px);
+        }
+
+        .slide.next {
+            transform: translateX(50%) scale(0.8);
+            opacity: 0.5;
+            z-index: 1;
+            filter: blur(2px);
+        }
+
+        /* Card Styling */
+        .tarot-card-wrapper {
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            text-align: center;
+            max-width: 100%;
+        }
+
+        .tarot-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
+
+        .fallacy-title {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin: 1rem 0 0.5rem;
+        }
+
+        .fallacy-name {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .content-text {
+            background: #000;
+            padding: 1rem;
+            border-radius: 5px;
+            font-style: italic;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            max-height: 150px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .explanation {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+            text-align: left;
+            background: rgba(255,255,255,0.05);
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .meta-info {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .meta-info a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Voting */
+        .voting {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .vote-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .vote-btn:hover {
+            color: var(--accent);
+        }
+
+        .vote-count {
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        /* Navigation Arrows */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            padding: 1rem;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-arrow:hover {
+            background: var(--accent);
+            color: black;
+        }
+
+        .prev-btn { left: 10px; }
+        .next-btn { right: 10px; }
+
+        @media (max-width: 600px) {
+            .slider-container { height: 800px; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Fallacy Hunter</h1>
+    <div class="subtitle">Mystical Archive of Logical Errors</div>
+</header>
+
+<div class="controls">
+    <button onclick="setSort('new')" id="btn-new" class="active">Newest</button>
+    <button onclick="setSort('hot')" id="btn-hot">Hot (Score)</button>
+    <button onclick="setSort('best')" id="btn-best">Best (Confidence)</button>
+</div>
+
+<div class="slider-container">
+    <button class="nav-arrow prev-btn" onclick="changeSlide(-1)">&#10094;</button>
+    
+    <div id="slides-wrapper">
+        <!-- Slides will be injected here -->
+    </div>
+
+    <button class="nav-arrow next-btn" onclick="changeSlide(1)">&#10095;</button>
+</div>
+
+<script>
+    let archiveData = [];
+    let currentSort = 'new';
+    let currentIndex = 0;
+
+    // Fetch data from local JSON file (generated by Python script)
+    async function loadData() {
+        try {
+            const response = await fetch('data/archive.json');
+            if (!response.ok) throw new Error("Archive not found");
+            archiveData = await response.json();
+            renderSlides();
+        } catch (error) {
+            console.error("Error loading archive:", error);
+            document.getElementById('slides-wrapper').innerHTML = '<p style="text-align:center; color:#666;">No fallacies found yet. Wait for the next automation run.</p>';
+        }
+    }
+
+    function sortData() {
+        if (currentSort === 'new') {
+            // Already sorted by insertion order (newest first) in Python
+            return [...archiveData];
+        } else if (currentSort === 'hot') {
+            // Sort by Reddit Score + Votes
+            return [...archiveData].sort((a, b) => {
+                const scoreA = (a.post_score || 0) + (a.votes.up - a.votes.down);
+                const scoreB = (b.post_score || 0) + (b.votes.up - b.votes.down);
+                return scoreB - scoreA;
+            });
+        } else if (currentSort === 'best') {
+            // Sort by Confidence
+            return [...archiveData].sort((a, b) => b.confidence - a.confidence);
+        }
+        return archiveData;
+    }
+
+    function setSort(type) {
+        currentSort = type;
+        document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+        document.getElementById(`btn-${type}`).classList.add('active');
+        currentIndex = 0;
+        renderSlides();
+    }
+
+    function renderSlides() {
+        const sorted = sortData();
+        const wrapper = document.getElementById('slides-wrapper');
+        wrapper.innerHTML = '';
+
+        if (sorted.length === 0) return;
+
+        sorted.forEach((item, index) => {
+            const slide = document.createElement('div');
+            slide.className = 'slide';
+            if (index === currentIndex) slide.classList.add('active');
+            if (index === currentIndex - 1) slide.classList.add('prev');
+            if (index === currentIndex + 1) slide.classList.add('next');
+
+            slide.innerHTML = `
+                <div class="tarot-card-wrapper">
+                    <img src="${item.card_image}" alt="${item.fallacy}" class="tarot-image">
+                    <h2 class="fallacy-title">${getTarotName(item.fallacy)}</h2>
+                    <div class="fallacy-name">${item.fallacy}</div>
+                    
+                    <div class="content-text">"${escapeHtml(item.content)}"</div>
+                    
+                    <div class="explanation">
+                        <strong>Analysis:</strong> ${item.explanation}
+                    </div>
+
+                    <div class="meta-info">
+                        Source: <a href="${item.post_url}" target="_blank">Reddit</a> | 
+                        Score: ${item.post_score} | 
+                        Date: ${new Date(item.timestamp).toLocaleDateString()}
+                    </div>
+
+                    <div class="voting">
+                        <button class="vote-btn" onclick="vote(${item.id}, 'up')">
+                            &#9650; <span class="vote-count" id="up-${item.id}">${item.votes.up}</span>
+                        </button>
+                        <button class="vote-btn" onclick="vote(${item.id}, 'down')">
+                            &#9660; <span class="vote-count" id="down-${item.id}">${item.votes.down}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            wrapper.appendChild(slide);
+        });
+    }
+
+    function changeSlide(direction) {
+        const sorted = sortData();
+        if (sorted.length === 0) return;
+
+        const newIndex = currentIndex + direction;
+        if (newIndex >= 0 && newIndex < sorted.length) {
+            currentIndex = newIndex;
+            renderSlides();
+        }
+    }
+
+    // Helper to map fallacy to Tarot Name (must match Python logic roughly)
+    function getTarotName(fallacy) {
+        const mapping = {
+            "Ad Hominem": "The Betrayer",
+            "Straw Man": "The Illusionist",
+            "Appeal to Authority": "The High Priest",
+            "False Dilemma": "The Forked Path",
+            "Slippery Slope": "The Avalanche",
+            "Circular Reasoning": "The Ouroboros",
+            "Hasty Generalization": "The Blind Seer",
+            "Red Herring": "The Distractor",
+            "Tu Quoque": "The Mirror",
+            "No True Scotsman": "The Gatekeeper"
+        };
+        return mapping[fallacy] || "The Unknown";
+    }
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Mock voting (since static site can't persist without backend/API)
+    // In a real scenario, this would call an API or use LocalStorage
+    function vote(id, type) {
+        const item = archiveData.find(i => i.id === id);
+        if (item) {
+            if (type === 'up') item.votes.up++;
+            else item.votes.down++;
+            
+            // Update UI locally
+            document.getElementById(`${type}-${id}`).innerText = item.votes[type];
+            
+            // Note: Changes won't persist to GitHub repo automatically from client-side JS
+            // This requires a backend or GitHub API integration which is complex for static sites
+            alert("Vote recorded locally! (Note: Static site cannot save votes permanently without a backend)");
+        }
+    }
+
+    // Initialize
+    loadData();
+
+</script>
+
+</body>
+</html>
