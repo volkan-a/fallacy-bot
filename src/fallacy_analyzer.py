@@ -6,12 +6,19 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 from huggingface_hub import InferenceClient
 
-# Hugging Face API Client
+# --- Konfigürasyon ---
 HF_TOKEN = os.getenv("HF_TOKEN")
+REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
+REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
+REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "FallacyTarotBot/1.0 by u/FallacyHunter")
+
 if not HF_TOKEN:
     raise ValueError("HF_TOKEN environment variable is not set!")
 
+# Hugging Face Client - Mixtral-8x7B daha yetenekli ve stabil
 client = InferenceClient(token=HF_TOKEN)
+ANALYSIS_MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+IMAGE_MODEL = "stabilityai/stable-diffusion-xl-base-1.0"
 
 # Sabitler
 OUTPUT_DIR = "docs"
@@ -33,34 +40,49 @@ FALLACY_PROMPTS = {
 }
 
 def get_reddit_posts():
-    """Reddit'ten popüler gönderileri çek (ücretsiz API)"""
-    headers = {'User-Agent': 'FallacyBot/1.0'}
-    url = "https://www.reddit.com/r/all/hot.json?limit=25"
+    """Reddit'ten popüler gönderileri çek (ücretsiz API, PRAW kullanmıyoruz)"""
+    # Daha geniş bir subreddit havuzu kullanarak 403 hatasını aşalım
+    subreddits = ["philosophy", "changemyview", "politics", "technology", "science", "worldnews"]
+    posts = []
     
-    try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        
-        posts = []
-        for child in data['data']['children']:
-            post_data = child['data']
-            # Sadece metin içeren veya kısa başlıklı gönderileri al
-            if post_data['selftext'] or len(post_data['title']) > 20:
-                text = post_data['selftext'] if post_data['selftext'] else post_data['title']
-                if len(text) > 50 and len(text) < 500:  # Çok kısa veya çok uzun olmayanlar
+    headers = {'User-Agent': REDDIT_USER_AGENT}
+    
+    for subreddit in subreddits:
+        url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit=10"
+        try:
+            response = requests.get(url, headers=headers, timeout=15)
+            if response.status_code == 403:
+                print(f"⚠️  r/{subreddit} erişimi engellendi, atlanıyor...")
+                continue
+            response.raise_for_status()
+            data = response.json()
+            
+            for child in data['data']['children']:
+                post_data = child['data']
+                # Sadece metin içeren veya tartışma yaratabilecek başlıkları al
+                text = post_data.get('selftext', '')
+                title = post_data.get('title', '')
+                
+                # İçerik uzunluğu kontrolü
+                content = text if text else title
+                if len(content) > 40 and len(content) < 600:
                     posts.append({
-                        'title': post_data['title'],
-                        'text': text,
+                        'title': title,
+                        'text': content,
                         'url': f"https://reddit.com{post_data['permalink']}",
-                        'score': post_data['score'],
-                        'author': post_data['author'] if post_data['author'] else 'anonymous',
-                        'created_utc': post_data['created_utc']
+                        'score': post_data.get('score', 0),
+                        'author': post_data.get('author', 'anonymous'),
+                        'created_utc': post_data.get('created_utc', 0)
                     })
-        return posts
-    except Exception as e:
-        print(f"Reddit API error: {e}")
-        return []
+                    
+            if len(posts) >= 20:  # Yeterli veri topladık
+                break
+                
+        except Exception as e:
+            print(f"r/{subreddit} çekilirken hata: {e}")
+            continue
+            
+    return posts
 
 def analyze_fallacy(text):
     """LLM ile mantık hatası analizi"""
@@ -80,18 +102,24 @@ def analyze_fallacy(text):
     try:
         response = client.text_generation(
             prompt,
-            model="mistralai/Mistral-7B-Instruct-v0.3",
-            max_new_tokens=200,
+            model=ANALYSIS_MODEL,
+            max_new_tokens=250,
             temperature=0.3
         )
         
         # JSON'u temizle ve parse et
         clean_response = response.strip()
-        if clean_response.startswith('```json'):
-            clean_response = clean_response[7:]
-        if clean_response.endswith('```'):
-            clean_response = clean_response[:-3]
+        if '```json' in clean_response:
+            clean_response = clean_response.split('```json')[1]
+        if '```' in clean_response:
+            clean_response = clean_response.split('```')[0]
         clean_response = clean_response.strip()
+        
+        # JSON bulmaya çalış (bazen model ekstra metin ekleyebilir)
+        start_idx = clean_response.find('{')
+        end_idx = clean_response.rfind('}') + 1
+        if start_idx != -1 and end_idx > start_idx:
+            clean_response = clean_response[start_idx:end_idx]
         
         result = json.loads(clean_response)
         return result
@@ -107,7 +135,7 @@ def generate_tarot_image(fallacy_type, output_path):
     prompt = FALLACY_PROMPTS[fallacy_type]
     
     try:
-        image = client.text_to_image(prompt, model="stabilityai/stable-diffusion-xl-base-1.0")
+        image = client.text_to_image(prompt, model=IMAGE_MODEL)
         image.save(output_path)
         print(f"Görsel başarıyla oluşturuldu: {output_path}")
         return True
