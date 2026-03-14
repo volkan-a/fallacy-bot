@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # Using Mistral-7B-Instruct-v0.3 per REQUIREMENTS.md AUTO-03 and research recommendation
 HF_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 HF_API_URL = (
-    f"https://api-inference.huggingface.co/models/{HF_MODEL}/v1/chat/completions"
+    f"https://router.huggingface.co/hf-inference/models/{HF_MODEL}/v1/chat/completions"
 )
 
 HF_TOKEN = os.getenv("HF_TOKEN", "")
