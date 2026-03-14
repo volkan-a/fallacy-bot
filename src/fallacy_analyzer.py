@@ -109,14 +109,10 @@ def generate_tarot_image(fallacy_type, output_path):
     try:
         image = client.text_to_image(prompt, model="stabilityai/stable-diffusion-xl-base-1.0")
         image.save(output_path)
+        print(f"Görsel başarıyla oluşturuldu: {output_path}")
         return True
     except Exception as e:
         print(f"Image generation error: {e}")
-        # Hata durumunda placeholder oluştur
-        img = Image.new('RGB', (512, 768), color='#1a0a2e')
-        draw = ImageDraw.Draw(img)
-        draw.text((50, 300), f"{fallacy_type}", fill='#gold', font_size=24)
-        img.save(output_path)
         return False
 
 def create_placeholder_image(fallacy_type, output_path):
@@ -181,7 +177,10 @@ def main():
             
             success = generate_tarot_image(result['fallacy_type'], image_path)
             if not success:
-                create_placeholder_image(result['fallacy_type'], image_path)
+                # Görsel oluşturulamazsa placeholder SVG kullan
+                image_filename = f"fallback_card.svg"
+                image_path = os.path.join(ASSETS_DIR, image_filename)
+                # Placeholder zaten mevcut, kopyalamaya gerek yok
             
             analyzed_posts.append({
                 'id': f"fallacy_{timestamp}_{i}",

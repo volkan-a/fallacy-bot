@@ -19,5 +19,26 @@
     "image": "assets/demo_tarot.png",
     "votes": {"up": 12, "down": 2},
     "category": "best"
+  },
+  {
+    "id": "demo_fallacy_002",
+    "timestamp": 1735776000,
+    "date": "2025-01-02 12:00",
+    "original_post": {
+      "title": "Politika Eleştirisi",
+      "text": "Bu politikayı sadece cahil insanlar destekler, sen de destekliyorsun demek ki cahilsin.",
+      "url": "#",
+      "author": "logic_master",
+      "score": 89
+    },
+    "fallacy": {
+      "type": "Ad Hominem",
+      "confidence": 0.92,
+      "explanation": "Kişinin argümanına değil, kişisel özelliklerine saldırma hatası. Politikayı desteklemenin zeka ile ilgisi yoktur, argümanın kendisi değerlendirilmelidir.",
+      "quote": "Bu politikayı sadece cahil insanlar destekler, sen de destekliyorsun demek ki cahilsin."
+    },
+    "image": "assets/placeholders/fallback_card.svg",
+    "votes": {"up": 8, "down": 1},
+    "category": "hot"
   }
 ]
