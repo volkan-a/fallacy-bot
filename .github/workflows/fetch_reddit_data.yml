@@ -1,0 +1,77 @@
+name: Fetch Reddit Data
+
+on:
+  workflow_dispatch:  # Manuel tetikleme için
+  schedule:
+    - cron: '0 */6 * * *'  # Her 6 saatte bir otomatik çalıştır
+
+jobs:
+  fetch-reddit-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+      
+      - name: Fetch Reddit JSON data
+        run: |
+          # Subreddit listesi - worldnews öncelikli
+          subreddits=("worldnews" "fallacy" "philosophy" "funny" "science" "todayilearned" "changemyview")
+          
+          # Veri klasörünü oluştur
+          mkdir -p data
+          
+          # Her subreddit için veri çek
+          for subreddit in "${subreddits[@]}"; do
+            echo "Fetching data from r/$subreddit..."
+            
+            # User-Agent ile wget kullanarak JSON çek
+            wget -q --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
+              -O "data/reddit_${subreddit}.json" \
+              "https://www.reddit.com/r/${subreddit}/top.json?t=week&limit=25"
+            
+            if [ $? -eq 0 ]; then
+              echo "✓ Successfully fetched r/$subreddit"
+              # Dosya boyutunu kontrol et (boş dosya olmaması için)
+              if [ -s "data/reddit_${subreddit}.json" ]; then
+                echo "✓ Data file is not empty"
+              else
+                echo "⚠ Warning: Fetched file is empty for r/$subreddit"
+              fi
+            else
+              echo "✗ Failed to fetch r/$subreddit"
+            fi
+            
+            # Reddit API rate limit'i aşmamak için bekle
+            sleep 2
+          done
+          
+          # İndirilen dosyaları listele
+          echo ""
+          echo "=== Downloaded Files ==="
+          ls -lh data/
+      
+      - name: Upload Reddit data as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: reddit-data
+          path: data/*.json
+          retention-days: 7
+      
+      - name: Commit and push if there are changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/*.json || true
+          git diff --staged --quiet || git commit -m "Update Reddit data [skip ci]"
+          git push || echo "No changes to push or push failed"

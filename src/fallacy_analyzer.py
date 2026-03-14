@@ -1,6 +1,6 @@
 import os
 import json
-import requests
+import subprocess
 import random
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
@@ -21,6 +21,11 @@ IMAGE_MODEL = "stabilityai/stable-diffusion-xl-base-1.0"
 OUTPUT_DIR = "docs"
 ASSETS_DIR = os.path.join(OUTPUT_DIR, "assets")
 DATA_FILE = os.path.join(OUTPUT_DIR, "fallacies.json")
+TEMP_JSON_PATH = "/tmp/reddit_data.json"
+DATA_DIR = "data"  # GitHub Actions tarafından indirilen verilerin klasörü
+
+# Subreddit listesi - worldnews öncelikli, sırayla denenir
+SUBREDDITS = ["worldnews", "fallacy", "philosophy", "funny", "science", "todayilearned", "changemyview"]
 
 # Mantık Hatası Türleri ve Sabit Tarot Promptları
 # Tema, aspect ratio ve stil sabittir, sadece konu değişir.
@@ -48,49 +53,216 @@ FALLACY_KEYWORDS = {
     "Middle Ground": "two monsters compromising on the fate of a victim in the middle"
 }
 
-def get_reddit_posts():
-    """Reddit'ten popüler gönderileri çek (ücretsiz JSON endpoint)"""
-    # r/worldnews/top.json?t=week kullanarak API key gerektirmeden veri çekiyoruz
-    url = "https://www.reddit.com/r/worldnews/top.json?t=week&limit=25"
-    headers = {'User-Agent': 'FallacyTarotBot/1.0'}
-    posts = []
+def download_reddit_json(subreddit):
+    """wget ile belirtilen subreddit'in JSON verisini çeker."""
+    url = f"https://www.reddit.com/r/{subreddit}/top.json?t=week&limit=25"
+    print(f"📡 wget ile çekiliyor: r/{subreddit}...")
     
     try:
-        response = requests.get(url, headers=headers, timeout=15)
-        if response.status_code == 403:
-            print("⚠️  Reddit erişimi engellendi, alternatif deneniyor...")
-            # Alternatif olarak philosophy subreddit'ini dene
-            url = "https://www.reddit.com/r/philosophy/top.json?t=week&limit=25"
-            response = requests.get(url, headers=headers, timeout=15)
+        # wget komutu: User-Agent header'ı ile
+        result = subprocess.run([
+            "wget", "-q", "-O", TEMP_JSON_PATH,
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "--timeout=15",
+            url
+        ], timeout=20, capture_output=True)
         
-        response.raise_for_status()
-        data = response.json()
-        
-        for child in data['data']['children']:
-            post_data = child['data']
-            text = post_data.get('selftext', '')
-            title = post_data.get('title', '')
+        # Dosya boyutunu kontrol et (boş dosya olmamalı)
+        if os.path.exists(TEMP_JSON_PATH) and os.path.getsize(TEMP_JSON_PATH) > 100:
+            return True
+        else:
+            print(f"⚠️  İndirilen dosya boş veya çok küçük.")
+            if os.path.exists(TEMP_JSON_PATH):
+                os.remove(TEMP_JSON_PATH)
+            return False
             
-            # İçerik uzunluğu kontrolü (çok kısa veya çok uzun olmasın)
-            content = text if text else title
+    except subprocess.TimeoutExpired:
+        print(f"⏱️  İstek zaman aşımına uğradı (20s).")
+        if os.path.exists(TEMP_JSON_PATH):
+            os.remove(TEMP_JSON_PATH)
+        return False
+    except Exception as e:
+        print(f"❌ wget hatası: {e}")
+        if os.path.exists(TEMP_JSON_PATH):
+            os.remove(TEMP_JSON_PATH)
+        return False
+
+def parse_reddit_json():
+    """İndirilen JSON dosyasından metinleri ayıklar."""
+    if not os.path.exists(TEMP_JSON_PATH):
+        return []
+    
+    try:
+        with open(TEMP_JSON_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        posts = []
+        children = data.get('data', {}).get('children', [])
+        
+        for child in children:
+            post_data = child.get('data', {})
+            title = post_data.get('title', '')
+            selftext = post_data.get('selftext', '')
+            
+            content = f"{title} {selftext}".strip()
+            
             if len(content) > 50 and len(content) < 800:
                 posts.append({
                     'title': title,
                     'text': content,
-                    'url': f"https://reddit.com{post_data['permalink']}",
+                    'url': f"https://reddit.com{post_data.get('permalink', '#')}",
                     'score': post_data.get('score', 0),
                     'author': post_data.get('author', 'anonymous'),
-                    'created_utc': post_data.get('created_utc', 0)
+                    'created_utc': post_data.get('created_utc', 0),
+                    'subreddit': 'unknown'
                 })
-                
-        print(f"✅ Reddit'ten {len(posts)} gönderi başarıyla çekildi.")
+        
+        if os.path.exists(TEMP_JSON_PATH):
+            os.remove(TEMP_JSON_PATH)
             
+        return posts
     except Exception as e:
-        print(f"Reddit çekilirken hata: {e}")
-        # Hata durumunda boş liste dön, mock data kullanılsın
+        print(f"❌ JSON parse hatası: {e}")
+        if os.path.exists(TEMP_JSON_PATH):
+            os.remove(TEMP_JSON_PATH)
         return []
+
+def load_reddit_from_data_folder():
+    """data/ klasöründeki Reddit JSON dosyalarını yükler (GitHub Actions tarafından indirilen)."""
+    all_posts = []
+    
+    print("\n[Reddit Veri Kaynağı - data/ klasörü]")
+    
+    # data klasörünü kontrol et
+    if not os.path.exists(DATA_DIR):
+        print(f"⚠️  {DATA_DIR} klasörü bulunamadı.")
+        return []
+    
+    # Tüm JSON dosyalarını tara
+    json_files = [f for f in os.listdir(DATA_DIR) if f.startswith('reddit_') and f.endswith('.json')]
+    
+    if not json_files:
+        print("⚠️  data/ klasöründe reddit_*.json dosyası bulunamadı.")
+        return []
+    
+    for json_file in sorted(json_files):
+        file_path = os.path.join(DATA_DIR, json_file)
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
             
-    return posts
+            children = data.get('data', {}).get('children', [])
+            subreddit_name = json_file.replace('reddit_', '').replace('.json', '')
+            
+            for child in children:
+                post_data = child.get('data', {})
+                title = post_data.get('title', '')
+                selftext = post_data.get('selftext', '')
+                
+                content = f"{title} {selftext}".strip()
+                
+                if len(content) > 50 and len(content) < 800:
+                    all_posts.append({
+                        'title': title,
+                        'text': content,
+                        'url': f"https://reddit.com{post_data.get('permalink', '#')}",
+                        'score': post_data.get('score', 0),
+                        'author': post_data.get('author', 'anonymous'),
+                        'created_utc': post_data.get('created_utc', 0),
+                        'subreddit': subreddit_name
+                    })
+            
+            print(f"✅ {json_file} üzerinden {len(children)} gönderi yüklendi.")
+        except Exception as e:
+            print(f"❌ {json_file} okuma hatası: {e}")
+    
+    print(f"\n🎯 Toplam {len(all_posts)} gönderi yüklendi.")
+    return all_posts
+
+def get_reddit_posts():
+    """Reddit'ten popüler gönderileri çek - Önce data/ klasörünü kontrol eder (GitHub Actions)
+    
+    Sıralama:
+    1. data/ klasöründeki JSON dosyalarını kullan (GitHub Actions tarafından indirilmiş)
+    2. Eğer yoksa wget ile dene
+    3. Eğer o da başarısız olursa mock data kullan
+    """
+    # Önce GitHub Actions tarafından indirilen verileri kontrol et
+    all_posts = load_reddit_from_data_folder()
+    
+    if all_posts:
+        return all_posts
+    
+    # Eğer data/ klasöründe veri yoksa, wget ile dene
+    print("\n[Reddit Veri Kaynağı - wget ile JSON]")
+    for sub in SUBREDDITS:
+        if download_reddit_json(sub):
+            posts = parse_reddit_json()
+            if posts:
+                print(f"✅ Başarılı! r/{sub} üzerinden {len(posts)} gönderi alındı.")
+                all_posts.extend(posts)
+                break  # İlk başarılı olandan devam et
+            else:
+                print(f"⚠️  r/{sub} boş veya geçerli veri yok.")
+        else:
+            print(f"⚠️  r/{sub} erişilemedi.")
+    
+    if all_posts:
+        print(f"\n🎯 Toplam {len(all_posts)} gönderi başarıyla çekildi.")
+        return all_posts
+    
+    # Eğer hiç gönderi çekilemediyse, örnek mock data kullan
+    print("⚠️  Reddit'ten veri çekilemedi, örnek veriler kullanılıyor...")
+    all_posts = [
+        {
+            'title': "Herkes bu filmi beğendi, o halde bu film kesinlikle en iyi filmdir.",
+            'text': "Tüm arkadaşlarım bu filmi çok beğendi. Demek ki bu film tarihin en iyi filmi olmalı. Herkesin aynı fikirde olması, filmin kalitesinin kanıtıdır.",
+            'url': "#",
+            'score': 150,
+            'author': "example_user",
+            'created_utc': datetime.now().timestamp(),
+            'subreddit': "fallacy"
+        },
+        {
+            'title': "Ya bizimlesiniz ya da düşmanımızsınız",
+            'text': "Bu konuda ya tamamen benimle hemfikirsiniz ya da tamamen yanılıyorsunuz. Orta yol yok. Eğer benim argümanımı desteklemiyorsanız, düşmanlarımdan birisiniz demektir.",
+            'url': "#",
+            'score': 89,
+            'author': "debate_master",
+            'created_utc': datetime.now().timestamp(),
+            'subreddit': "philosophy"
+        },
+        {
+            'title': "Doktor dedi, öyleyse doğrudur",
+            'text': "Dr. Smith bu ilacı önerdi. O bir doktor olduğu için bu ilacın işe yarayacağı kesinlikle doğrudur. Doktorların her söylediği doğru olmalıdır.",
+            'url': "#",
+            'score': 234,
+            'author': "health_guru",
+            'created_utc': datetime.now().timestamp(),
+            'subreddit': "science"
+        },
+        {
+            'title': "Bundan sonra bu oldu, demek ki bundan dolayı oldu",
+            'text': "Dün vitamin takviyesi almaya başladım ve bugün kendimi daha iyi hissediyorum. Demek ki vitamin takviyesi beni iyileştirdi. Bundan sonra her hasta vit almalı.",
+            'url': "#",
+            'score': 67,
+            'author': "wellness_fan",
+            'created_utc': datetime.now().timestamp(),
+            'subreddit': "todayilearned"
+        },
+        {
+            'title': "Plastik poşetleri yasaklarsak yakında her şeyi yasaklayacaklar",
+            'text': "Önce plastik poşetleri yasakladılar. Sonra pipetleri. Yakında araba kullanmayı, et yemeyi, hatta nefes almayı bile yasaklayacaklar! Bu kaygan zeminde ilerliyoruz.",
+            'url': "#",
+            'score': 312,
+            'author': "freedom_fighter",
+            'created_utc': datetime.now().timestamp(),
+            'subreddit': "changemyview"
+        }
+    ]
+    print(f"✅ {len(all_posts)} örnek veri yüklendi.")
+    
+    return all_posts
 
 def analyze_fallacy(text):
     """LLM ile mantık hatası analizi"""
