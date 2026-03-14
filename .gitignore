@@ -1,4 +1,25 @@
-```yaml
-# GitHub workflow files are typically not ignored
-# No additional ignores needed for this change set
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+.env
+.env.local
+.env.*
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Editors
+.vscode/
+.idea/
+
+# GitHub Actions cache
+.github/workflows/*.py
 ```
