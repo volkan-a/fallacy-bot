@@ -1,84 +1,100 @@
-# Requirements: Know Your Fallacy
+# Requirements: Fallacy Tarot
 
 **Defined:** 2026-03-14
-**Core Value:** Accurate and accessible detection of logical fallacies to improve critical thinking skills.
+**Core Value:** Automatically discover and beautifully present logical fallacies from Reddit discussions to make critical thinking engaging and accessible.
 
 ## v1 Requirements
 
 Requirements for initial release. Each maps to roadmap phases.
 
-### Core Detection
+### Automation & Data Pipeline
 
-- [ ] **DETECT-01**: User can input text (up to 10,000 characters) via paste or text box
-- [ ] **DETECT-02**: System detects common logical fallacies in user-provided text using OpenAI API
-- [ ] **DETECT-03**: System provides sentence-level highlighting for detected fallacies
-- [ ] **DETECT-04**: System displays confidence scores (High/Medium/Low) for each detected fallacy
-- [ ] **DETECT-05**: System can identify multiple fallacies in a single text
-- [ ] **DETECT-06**: Clear loading/processing indicators during AI analysis
-- [ ] **DETECT-07**: Robust error handling for API failures, rate limits, and network errors
+- [ ] **AUTO-01**: System automatically scrapes popular Reddit posts every 6 hours via GitHub Actions cron schedule (00:00, 06:00, 12:00, 18:00 UTC)
+- [ ] **AUTO-02**: Reddit API client handles rate limits gracefully (30 req/min public, 60 req/min OAuth with ratelimit_seconds config up to 600s)
+- [ ] **AUTO-03**: Hugging Face Mistral-7B-Instruct analyzes scraped posts for logical fallacies with confidence scores
+- [ ] **AUTO-04**: System detects all 10 specific fallacy types (Ad Hominem, Straw Man, Appeal to Authority, False Dilemma, Slippery Slope, Circular Reasoning, Hasty Generalization, Red Herring, Tu Quoque, Appeal to Emotion)
+- [ ] **AUTO-05**: JSON data structure stores detected fallacies with fields: post_id, title, content, fallacy_type, confidence_score, upvotes, downvotes, timestamp, image_url
+- [ ] **AUTO-06**: Atomic JSON writes prevent data corruption during concurrent GitHub Actions runs
+- [ ] **AUTO-07**: Fallback placeholder tarot cards used when image generation fails (don't block automation)
 
-### Visual Results
+### AI Analysis & LLM Integration
 
-- [ ] **VISUAL-01**: Color-coded display of fallacy detection results in text
-- [ ] **VISUAL-02**: Tarot card visual theme for each detected fallacy
-- [ ] **VISUAL-03**: Detailed explanation of what each fallacy is and why it's incorrect
-- [ ] **VISUAL-04**: Real-world examples for each detected fallacy
-- [ ] **VISUAL-05**: Fallacy severity rating (minor issue vs major logical flaw)
-- [ ] **VISUAL-06**: Context-sensitive explanations based on user's specific text
-- [ ] **VISUAL-07**: Citation of detected fallacy locations (line numbers, highlighted passages)
+- [ ] **AI-01**: Hugging Face Inference API integration with exponential backoff retry logic (up to 5 retries)
+- [ ] **AI-02**: Mistral-7B-Instruct text-classification pipeline returns format: `{'label': 'FALLACY_TYPE', 'score': 0.89}`
+- [ ] **AI-03**: Confidence scores displayed to users (High/Medium/Low based on threshold: >0.8, 0.5-0.8, <0.5)
+- [ ] **AI-04**: Graceful degradation when Hugging Face API unavailable (skip analysis, log error, continue with other posts)
+- [ ] **AI-05**: Content validation filters out NSFW, quarantined, or deleted Reddit posts before analysis
 
-### Fallacy Library
+### Image Generation
 
-- [ ] **LIBRARY-01**: Searchable library of common logical fallacies
-- [ ] **LIBRARY-02**: Fallacy categorization (formal, informal, relevance, ambiguity, etc.)
-- [ ] **LIBRARY-03**: Browsing by category with tarot card visual design
-- [ ] **LIBRARY-04**: Detailed explanations, examples, and related fallacies for each fallacy
-- [ ] **LIBRARY-05**: Related fallacy suggestions (if X is present, check for Y)
+- [ ] **IMG-01**: Stable Diffusion XL generates unique tarot card images for each detected fallacy type
+- [ ] **IMG-02**: Image generation prompts optimized for mystical tarot style (blues, purples, gold accents, symbolic metaphors per fallacy)
+- [ ] **IMG-03**: Retry logic with exponential backoff for image generation failures (GPU contention, timeouts)
+- [ ] **IMG-04**: Image compression reduces file size while maintaining visual quality (target < 500KB per card)
+- [ ] **IMG-05**: Fallback placeholder images prevent broken UI when generation fails
+- [ ] **IMG-06**: Images stored in docs/assets/ directory with naming convention: `fallacy_type_{timestamp}.png`
 
-### Tarot Theme & Design
+### Web Interface & Frontend
 
-- [ ] **TAROT-01**: Mystical tarot card visual design system for all fallacy displays
-- [ ] **TAROT-02**: Visual metaphors that relate fallacy meaning to tarot imagery
-- [ ] **TAROT-03**: Consistent tarot-themed design across all components
-- [ ] **TAROT-04**: Brand-appropriate color palette (#4A90A4 main blue, #2C5F7A dark blue)
+- [ ] **WEB-01**: Static HTML/CSS/JavaScript interface (no frameworks) served via GitHub Pages
+- [ ] **WEB-02**: Tarot card display with mystical theme (color palette: blues, purples, gold accents)
+- [ ] **WEB-03**: Slider navigation UI for browsing tarot cards (custom JavaScript slider with CSS transforms/transitions)
+- [ ] **WEB-04**: Image lazy loading using browser-native `loading="lazy"` attribute or Intersection Observer
+- [ ] **WEB-05**: Responsive design with mobile-first approach (mobile 1-column, tablet 2-column, desktop 3-column grid)
+- [ ] **WEB-06**: Content validation handles missing JSON fields and displays user-friendly error messages
+- [ ] **WEB-07**: "Last updated" timestamp displayed on website (6-hour update cycle)
 
-### Accessibility & Performance
+### Voting System
 
-- [ ] **ACCESS-01**: Mobile-responsive design (desktop 3-column, tablet 2-column, mobile 1-column)
-- [ ] **ACCESS-02**: WCAG 2.1 AA compliance (keyboard navigation, screen reader compatibility, sufficient color contrast)
-- [ ] **ACCESS-03**: Page load time < 3 seconds, First Contentful Paint < 1.5 seconds
-- [ ] **ACCESS-04**: Lighthouse performance score 90+
-- [ ] **ACCESS-05**: Inter font family with responsive typography
-- [ ] **ACCESS-06**: Clear call-to-action buttons (analyze, learn more, clear)
-- [ ] **ACCESS-07**: Character counter for text input field
+- [ ] **VOTE-01**: Client-side upvote/downvote buttons on each tarot card
+- [ ] **VOTE-02**: Vote counts tracked in JSON (upvotes, downvotes fields)
+- [ ] **VOTE-03**: User vote state persisted in localStorage (prevents duplicate votes from same browser)
+- [ ] **VOTE-04**: "Hot" sorting algorithm implemented (Wilson score interval or simplified version for user familiarity)
+- [ ] **VOTE-05**: "Best" sorting by net upvotes (upvotes - downvotes)
+- [ ] **VOTE-06**: "Newest" sorting by timestamp
 
-### Backend & Infrastructure
+### GitHub Actions Automation
 
-- [ ] **BACKEND-01**: Flask backend API routes for fallacy detection
-- [ ] **BACKEND-02**: OpenAI API integration with GPT-5.4 model
-- [ ] **BACKEND-03**: Rate limiting to control OpenAI API costs and prevent abuse
-- [ ] **BACKEND-04**: Caching strategy for fallacy analysis results
-- [ ] **BACKEND-05**: Error handling and logging for API failures
-- [ ] **BACKEND-06**: CORS configuration for React frontend communication
+- [ ] **GHA-01**: GitHub Actions workflow triggers on cron schedule (every 6 hours)
+- [ ] **GHA-02**: Workflow concurrency groups prevent parallel runs (`concurrency: group: ${{ github.workflow }}`)
+- [ ] **GHA-03**: GitHub Pages deployment triggered automatically when JSON files are committed
+- [ ] **GHA-04**: HF_TOKEN secret securely accessed in workflow for Hugging Face API
+- [ ] **GHA-05**: SD_TOKEN secret securely accessed in workflow for Stable Diffusion API
+- [ ] **GHA-06**: Timeout handling prevents 6-hour GitHub Actions execution limit exceeded
+- [ ] **GHA-07**: Git operations handle push conflicts with conflict resolution logic
+
+### Performance & Reliability
+
+- [ ] **PERF-01**: Page load time < 3 seconds (LCP < 2.5s target)
+- [ ] **PERF-02**: Cumulative Layout Shift (CLS) < 0.1
+- [ ] **PERF-03**: Interaction to Next Paint (INP) < 200ms
+- [ ] **PERF-04**: Lighthouse performance score 90+
+- [ ] **PERF-05**: Archive rotation policy prevents JSON files from exceeding 100 MB GitHub Pages limit
+- [ ] **PERF-06**: Error logging captures all failures (Reddit API, Hugging Face, Stable Diffusion, JSON writes)
+
+### Security & Constraints
+
+- [ ] **SEC-01**: Zero-cost operation enforced (only free tiers: Reddit API public endpoints, Hugging Face free tier, Stable Diffusion free tier, GitHub Pages free tier)
+- [ ] **SEC-02**: No backend server (static GitHub Pages hosting only)
+- [ ] **SEC-03**: No databases (JSON file storage only)
+- [ ] **SEC-04**: No frontend frameworks (vanilla JavaScript only)
+- [ ] **SEC-05**: API tokens stored securely in GitHub Secrets (never committed to repo)
 
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
 
-### User Accounts & Tracking
-
-- **USER-01**: User account creation with email/password
-- **USER-02**: User profiles with fallacy analysis history
-- **USER-03**: Progress tracking (fallacies learned, improvement over time)
-- **USER-04**: Personalized learning recommendations
-
 ### Advanced Features
 
-- **ADV-01**: Export results (PDF, shareable link, copy formatted text)
-- **ADV-02**: Practice mode with sample texts
-- **ADV-03**: Real-time analysis preview with debounce
-- **ADV-04**: Difficulty levels (beginner, intermediate, advanced)
-- **ADV-05**: Visual fallacy relationships (interactive graph or tree)
+- **ADV-01**: Archive browsing (historical fallacy detection results)
+- **ADV-02**: Multi-language support (non-English UI and analysis)
+- **ADV-03**: Reddit thread embedding (keep users on-site)
+- **ADV-04**: User preferences and filters (customization)
+- **ADV-05**: Advanced search across all historical fallacies
+- **ADV-06**: Shareable individual tarot cards (social sharing)
+- **ADV-07**: Real-time vote count updates (WebSocket server required - violates zero-cost constraint)
+- **ADV-08**: User accounts and authentication (backend required - violates zero-cost constraint)
+- **ADV-09**: Comment system on website (moderation required - violates zero-cost constraint)
 
 ## Out of Scope
 
@@ -86,17 +102,16 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Social features (voting, sharing, comments) | Out of scope per PROJECT.md v1; adds complexity; privacy concerns |
-| User accounts and authentication | Out of scope per PROJECT.md v1; adds infrastructure complexity; anonymous usage for v1 |
-| Multi-language support | Out of scope per PROJECT.md v1; requires translation resources; English-only for v1 |
-| Real-time Reddit/forum scraping | Out of scope per PROJECT.md v1; legal and technical challenges |
-| Grammar/spelling correction | Not core value; partner with or recommend grammar tools |
-| AI detection (detect if text is AI-generated) | Different product category; dilutes focus on logical fallacies |
-| Debate platform (structured arguments, pro/con) | Different product category; complex moderation required |
-| Paid subscriptions/monetization | V1 is validation phase; monetization premature |
-| Native mobile apps (iOS/Android) | Out of scope per PROJECT.md (web-only); expensive development |
-| Advanced AI model training (custom ML) | High complexity; time/resource intensive; OpenAI API sufficient |
-| Community forums or Q&A | Requires moderation; out of scope per PROJECT.md v1 |
+| User accounts and authentication | Adds backend complexity, violates zero-cost constraint, no user data collection needed for read-only site |
+| Backend server | Requires hosting cost ($5-50/month), DevOps overhead, violates GitHub Pages constraint |
+| Database (SQL/NoSQL) | Overkill for read-only content, requires managed service or self-hosting, operational complexity |
+| Real-time Reddit scraping | Violates Reddit API rate limits, unpredictable cost, GitHub Actions timeout limits |
+| Multi-language support (v1) | Increases LLM inference cost 4-10x, complicates UI, dilutes MVP focus |
+| Paid LLM APIs (OpenAI, Anthropic) | Recurring costs ($10-100/month), budget anxiety, Hugging Face free tier sufficient |
+| Comment system on website | Requires moderation (spam, toxicity), legal liability, duplicates Reddit discussions |
+| Real-time voting updates | Requires WebSocket server, breaks static hosting constraint, complexity disproportionate to value |
+| Advanced search/filtering | Increases JSON payload size, requires backend query logic, UI complexity |
+| Native mobile apps | High development cost, violates zero-cost constraint, web-only responsive approach sufficient |
 
 ## Traceability
 
@@ -104,47 +119,60 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DETECT-01 | Phase 1 | Pending |
-| DETECT-02 | Phase 1 | Pending |
-| DETECT-03 | Phase 1 | Pending |
-| DETECT-04 | Phase 1 | Pending |
-| DETECT-05 | Phase 2 | Pending |
-| DETECT-06 | Phase 1 | Pending |
-| DETECT-07 | Phase 1 | Pending |
-| VISUAL-01 | Phase 2 | Pending |
-| VISUAL-02 | Phase 2 | Pending |
-| VISUAL-03 | Phase 2 | Pending |
-| VISUAL-04 | Phase 2 | Pending |
-| VISUAL-05 | Phase 2 | Pending |
-| VISUAL-06 | Phase 2 | Pending |
-| VISUAL-07 | Phase 2 | Pending |
-| LIBRARY-01 | Phase 2 | Pending |
-| LIBRARY-02 | Phase 2 | Pending |
-| LIBRARY-03 | Phase 2 | Pending |
-| LIBRARY-04 | Phase 2 | Pending |
-| LIBRARY-05 | Phase 2 | Pending |
-| TAROT-01 | Phase 1 | Pending |
-| TAROT-02 | Phase 1 | Pending |
-| TAROT-03 | Phase 1 | Pending |
-| TAROT-04 | Phase 1 | Pending |
-| ACCESS-01 | Phase 1 | Pending |
-| ACCESS-02 | Phase 1 | Pending |
-| ACCESS-03 | Phase 2 | Pending |
-| ACCESS-04 | Phase 2 | Pending |
-| ACCESS-05 | Phase 1 | Pending |
-| ACCESS-06 | Phase 1 | Pending |
-| ACCESS-07 | Phase 1 | Pending |
-| BACKEND-01 | Phase 1 | Pending |
-| BACKEND-02 | Phase 1 | Pending |
-| BACKEND-03 | Phase 1 | Pending |
-| BACKEND-04 | Phase 1 | Pending |
-| BACKEND-05 | Phase 1 | Pending |
-| BACKEND-06 | Phase 1 | Pending |
+| AUTO-01 | Phase 1 | Pending |
+| AUTO-02 | Phase 1 | Pending |
+| AUTO-03 | Phase 1 | Pending |
+| AUTO-04 | Phase 1 | Pending |
+| AUTO-05 | Phase 1 | Pending |
+| AUTO-06 | Phase 1 | Pending |
+| AUTO-07 | Phase 1 | Pending |
+| AI-01 | Phase 1 | Pending |
+| AI-02 | Phase 1 | Pending |
+| AI-03 | Phase 1 | Pending |
+| AI-04 | Phase 1 | Pending |
+| AI-05 | Phase 1 | Pending |
+| IMG-01 | Phase 2 | Pending |
+| IMG-02 | Phase 2 | Pending |
+| IMG-03 | Phase 2 | Pending |
+| IMG-04 | Phase 2 | Pending |
+| IMG-05 | Phase 2 | Pending |
+| IMG-06 | Phase 2 | Pending |
+| WEB-01 | Phase 2 | Pending |
+| WEB-02 | Phase 2 | Pending |
+| WEB-03 | Phase 2 | Pending |
+| WEB-04 | Phase 2 | Pending |
+| WEB-05 | Phase 2 | Pending |
+| WEB-06 | Phase 2 | Pending |
+| WEB-07 | Phase 2 | Pending |
+| VOTE-01 | Phase 3 | Pending |
+| VOTE-02 | Phase 3 | Pending |
+| VOTE-03 | Phase 3 | Pending |
+| VOTE-04 | Phase 3 | Pending |
+| VOTE-05 | Phase 3 | Pending |
+| VOTE-06 | Phase 3 | Pending |
+| GHA-01 | Phase 1 | Pending |
+| GHA-02 | Phase 1 | Pending |
+| GHA-03 | Phase 1 | Pending |
+| GHA-04 | Phase 1 | Pending |
+| GHA-05 | Phase 2 | Pending |
+| GHA-06 | Phase 1 | Pending |
+| GHA-07 | Phase 1 | Pending |
+| PERF-01 | Phase 3 | Pending |
+| PERF-02 | Phase 3 | Pending |
+| PERF-03 | Phase 3 | Pending |
+| PERF-04 | Phase 3 | Pending |
+| PERF-05 | Phase 1 | Pending |
+| PERF-06 | Phase 1 | Pending |
+| SEC-01 | Phase 1 | Pending |
+| SEC-02 | Phase 1 | Pending |
+| SEC-03 | Phase 1 | Pending |
+| SEC-04 | Phase 2 | Pending |
+| SEC-05 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 38 total
-- Mapped to phases: 38 ✓
-- Unmapped: 0
+- v1 requirements: 57 total
+- Mapped to phases: 0
+- Unmapped: 57 ⚠️
 
 ---
 *Requirements defined: 2026-03-14*
