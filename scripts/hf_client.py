@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Hugging Face LLM client using InferenceClient.
-Using Zephyr-7b-beta: The most reliable model on Free Inference API.
+Hugging Face LLM client using InferenceClient for Mistral text_generation.
+Uses text_generation method which is stable for instruct-tuned models.
 """
 
 import os
@@ -11,15 +11,15 @@ from huggingface_hub import InferenceClient
 
 logger = logging.getLogger(__name__)
 
-# Zephyr 7b beta: Hugging Face'in en stabil çalışan ücretsiz modeli
-HF_MODEL = "HuggingFaceH4/zephyr-7b-beta"
+# Mistral 7B Instruct v0.3: En stabil, ücretsiz Inference API'de çalışan model
+HF_MODEL = "mistralai/Mistral-7B-Instruct-v0.3"
 
 # client endpoint'i otomatik yönlendirir
 client = InferenceClient(model=HF_MODEL, token=os.getenv("HF_TOKEN"))
 
 
 def analyze_fallacy(text: str) -> Optional[Dict]:
-    """Analyze text for logical fallacies using Hugging Face LLM."""
+    """Analyze text for logical fallacies."""
     from scripts.fallacy_prompts import (
         create_fallacy_detection_prompt,
         parse_fallacy_response,
@@ -30,15 +30,13 @@ def analyze_fallacy(text: str) -> Optional[Dict]:
     prompt = create_fallacy_detection_prompt(text)
 
     try:
-        # Chat model olduğu için chat_completion kullanıyoruz
-        response = client.chat_completion(
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=500,
-            temperature=0.3,
+        # Mistral-Instruct için text_generation kullanıyoruz
+        # Prompt'u doğrudan string olarak veriyoruz
+        response = client.text_generation(
+            prompt, max_new_tokens=500, temperature=0.3, return_full_text=False
         )
 
-        content = response.choices[0].message.content
-        result = parse_fallacy_response(content)
+        result = parse_fallacy_response(response)
 
         if result:
             confidence = result.get("confidence", 0.0)
