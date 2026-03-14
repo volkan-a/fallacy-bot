@@ -22,7 +22,7 @@
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
 | **huggingface_hub** | 0.23.0+ | Hugging Face Inference API client | Official HF client, automatic provider selection, OpenAI-compatible API support |
-| **Mistral-7B-Instruct-v0.3** | Latest | Fallacy detection LLM | High-quality instruction following, efficient 7B parameter model, excellent reasoning capabilities |
+| **google/gemma-3-4b-it** | Latest | Fallacy detection LLM | High-quality instruction following, efficient 4B parameter model (faster than 7B), excellent reasoning capabilities, zero-cost via Hugging Face free tier |
 | **Stable Diffusion XL** | Latest | Tarot card image generation | State-of-the-art image generation, mystical/symbolic style suitable for tarot cards |
 | **Pillow** | 10.0.0+ | Image processing | Save and manipulate generated images |
 
