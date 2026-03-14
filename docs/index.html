@@ -1,388 +1,97 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fallacy Tarot - Mistik Mantık Analizi</title>
-    <style>
-        :root {
-            --bg-dark: #0f0518;
-            --bg-card: #1a0a2e;
-            --gold: #d4af37;
-            --gold-light: #f4cf57;
-            --purple: #6b2c91;
-            --text: #e8dff5;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, var(--bg-dark), #2d1b4e);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            padding: 40px 0;
-            border-bottom: 2px solid var(--gold);
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            font-size: 3em;
-            color: var(--gold);
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            font-style: italic;
-            opacity: 0.8;
-            font-size: 1.2em;
-        }
-
-        .nav-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: 2px solid var(--gold);
-            color: var(--gold);
-            padding: 12px 30px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Georgia', serif;
-        }
-
-        .tab-btn:hover, .tab-btn.active {
-            background: var(--gold);
-            color: var(--bg-dark);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
-        }
-
-        .slider-container {
-            position: relative;
-            overflow: hidden;
-            padding: 20px 0;
-        }
-
-        .card {
-            min-width: 100%;
-            padding: 20px;
-        }
-
-        .tarot-display {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            max-width: 900px;
-            margin: 0 auto;
-            background: rgba(26, 10, 46, 0.8);
-            border: 3px solid var(--gold);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 0 30px rgba(107, 44, 145, 0.4);
-        }
-
-        .tarot-image {
-            text-align: center;
-        }
-
-        .tarot-image img {
-            max-width: 100%;
-            height: auto;
-            border: 2px solid var(--gold);
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-        }
-
-        .fallacy-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .fallacy-title {
-            font-size: 2em;
-            color: var(--gold);
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .original-post {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 3px solid var(--purple);
-        }
-
-        .post-title {
-            font-weight: bold;
-            color: var(--gold-light);
-            margin-bottom: 8px;
-        }
-
-        .post-text {
-            line-height: 1.6;
-            font-style: italic;
-        }
-
-        .explanation {
-            background: rgba(212, 175, 55, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--gold);
-        }
-
-        .explanation h3 {
-            color: var(--gold);
-            margin-bottom: 10px;
-        }
-
-        .vote-section {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .vote-btn {
-            background: transparent;
-            border: 2px solid var(--gold);
-            color: var(--gold);
-            padding: 10px 25px;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .vote-btn:hover {
-            background: var(--gold);
-            color: var(--bg-dark);
-        }
-
-        .vote-count {
-            font-size: 1.3em;
-            font-weight: bold;
-        }
-
-        .nav-arrows {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-
-        .arrow-btn {
-            background: var(--gold);
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.5em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .arrow-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 1.5em;
-            color: var(--gold);
-        }
-
-        @media (max-width: 768px) {
-            .tarot-display {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-        }
-    </style>
+    <title>Fallacy Tarot - Mystical Logic Analysis</title>
+    <meta name="description" content="Discover logical fallacies in popular Reddit posts, presented as beautiful tarot cards.">
+    <link rel="stylesheet" href="style.css">
+    <!-- Preload fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🔮 Fallacy Tarot 🔮</h1>
-            <p class="subtitle">Mistik dünyada mantık hatalarını keşfet</p>
+            <p class="subtitle">Discover logical fallacies hidden in everyday discourse</p>
+            <div class="last-updated" id="last-updated">Last updated: Loading...</div>
         </header>
 
-        <div class="nav-tabs">
-            <button class="tab-btn active" onclick="filterBy('new')">Yeni</button>
-            <button class="tab-btn" onclick="filterBy('hot')">Sıcak</button>
-            <button class="tab-btn" onclick="filterBy('best')">En İyi</button>
-        </div>
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-filter="newest" aria-label="Sort by Newest">Newest</button>
+            <button class="tab-btn" data-filter="hot" aria-label="Sort by Hot">Hot</button>
+            <button class="tab-btn" data-filter="best" aria-label="Sort by Best">Best</button>
+        </nav>
 
-        <div id="content" class="slider-container">
-            <div class="loading">Veriler yükleniyor...</div>
-        </div>
+        <main id="content" class="slider-container" aria-live="polite">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Consulting the cards...</p>
+            </div>
+        </main>
 
-        <div class="nav-arrows">
-            <button class="arrow-btn" onclick="prevCard()">❮</button>
-            <button class="arrow-btn" onclick="nextCard()">❯</button>
-        </div>
+        <nav class="nav-arrows" aria-label="Card navigation">
+            <button class="arrow-btn prev-btn" id="prev-btn" aria-label="Previous card" disabled>❮</button>
+            <div class="card-counter" id="card-counter">0 / 0</div>
+            <button class="arrow-btn next-btn" id="next-btn" aria-label="Next card" disabled>❯</button>
+        </nav>
+        
+        <footer>
+            <p>Automatically generated every 6 hours from Reddit data.</p>
+            <p>Images generated by Stable Diffusion XL. Analysis by Hugging Face.</p>
+            <p><small>For educational purposes only.</small></p>
+        </footer>
     </div>
 
-    <script>
-        let fallacies = [];
-        let filteredFallacies = [];
-        let currentIndex = 0;
-
-        async function loadFallacies() {
-            try {
-                const response = await fetch('data/fallacies.json');
-                fallacies = await response.json();
-                filterBy('new');
-            } catch (error) {
-                document.getElementById('content').innerHTML = 
-                    '<div class="loading">Veri yüklenemedi. Lütfen daha sonra tekrar deneyin.</div>';
-                console.error('Error loading fallacies:', error);
-            }
-        }
-
-        function filterBy(category) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent.toLowerCase().includes(
-                    category === 'new' ? 'yeni' : 
-                    category === 'hot' ? 'sıcak' : 'en iyi'
-                )) {
-                    btn.classList.add('active');
-                }
-            });
-
-            if (category === 'new') {
-                filteredFallacies = [...fallacies].sort((a, b) => b.timestamp - a.timestamp);
-            } else if (category === 'hot') {
-                filteredFallacies = fallacies.filter(f => f.category === 'hot' || f.category === 'best');
-            } else if (category === 'best') {
-                filteredFallacies = fallacies.filter(f => f.category === 'best')
-                    .sort((a, b) => (b.votes.up - b.votes.down) - (a.votes.up - a.votes.down));
-            }
-
-            currentIndex = 0;
-            renderCard();
-        }
-
-        function renderCard() {
-            const container = document.getElementById('content');
-            
-            if (filteredFallacies.length === 0) {
-                container.innerHTML = '<div class="loading">Bu kategoride veri bulunamadı.</div>';
-                return;
-            }
-
-            const item = filteredFallacies[currentIndex];
-            const voteScore = item.votes.up - item.votes.down;
-            
-            // Görsel URL'si - eğer yoksa fallback kullan
-            let imageUrl = item.image;
-            if (!imageUrl || imageUrl.trim() === '') {
-                imageUrl = 'assets/fallback_card.svg';
-            }
-
-            container.innerHTML = `
-                <div class="card">
-                    <div class="tarot-display">
-                        <div class="tarot-image">
-                            <img src="${imageUrl}" alt="${item.fallacy.type} Tarot Kartı" 
-                                 onerror="this.onerror=null; this.src='assets/fallback_card.svg';">
+    <!-- Template for a card (used by JS) -->
+    <template id="card-template">
+        <div class="card fade-in">
+            <div class="tarot-display">
+                <div class="tarot-image-container">
+                    <img class="tarot-image" src="" alt="Tarot Card" loading="lazy">
+                    <div class="confidence-badge"></div>
+                </div>
+                
+                <div class="fallacy-info">
+                    <div class="card-header">
+                        <span class="card-number">X</span>
+                        <h2 class="fallacy-title">Title</h2>
+                    </div>
+                    
+                    <div class="explanation">
+                        <h3>The Reading</h3>
+                        <p class="explanation-text">Explanation here</p>
+                        <blockquote class="fallacy-quote">"Quote here"</blockquote>
+                    </div>
+                    
+                    <div class="original-post">
+                        <h3>The Source</h3>
+                        <div class="post-meta">
+                            <span class="subreddit">r/subreddit</span>
+                            <span class="author">u/author</span>
+                            <span class="reddit-score">⭐ 0</span>
                         </div>
-                        <div class="fallacy-info">
-                            <h2 class="fallacy-title">${item.fallacy.type}</h2>
-                            
-                            <div class="original-post">
-                                <div class="post-title">📜 Orijinal Gönderi</div>
-                                <div class="post-title" style="font-size: 0.9em; margin-bottom: 5px;">
-                                    ${item.original_post.title}
-                                </div>
-                                <div class="post-text">"${item.original_post.text}"</div>
-                                <div style="margin-top: 10px; font-size: 0.8em; opacity: 0.7;">
-                                    u/${item.original_post.author} • ⭐ ${item.original_post.score} puan
-                                </div>
-                            </div>
+                        <h4 class="post-title">Post Title</h4>
+                        <div class="post-text">Post content</div>
+                        <a href="#" class="source-link" target="_blank" rel="noopener noreferrer">View Original on Reddit</a>
+                    </div>
 
-                            <div class="explanation">
-                                <h3>🔍 Mantık Hatası Açıklaması</h3>
-                                <p>${item.fallacy.explanation}</p>
-                                ${item.fallacy.quote ? `<p style="margin-top: 10px; font-style: italic;">"${item.fallacy.quote}"</p>` : ''}
-                                <p style="margin-top: 10px; font-size: 0.9em;">Güven: ${(item.fallacy.confidence * 100).toFixed(0)}%</p>
-                            </div>
-
-                            <div class="vote-section">
-                                <button class="vote-btn" onclick="vote('${item.id}', 'up')">⬆️ (${item.votes.up})</button>
-                                <span class="vote-count">${voteScore > 0 ? '+' : ''}${voteScore}</span>
-                                <button class="vote-btn" onclick="vote('${item.id}', 'down')">⬇️ (${item.votes.down})</button>
-                            </div>
-                        </div>
+                    <div class="vote-section">
+                        <button class="vote-btn upvote" aria-label="Upvote">
+                            <span class="icon">⬆️</span> <span class="count">0</span>
+                        </button>
+                        <span class="vote-score">0</span>
+                        <button class="vote-btn downvote" aria-label="Downvote">
+                            <span class="icon">⬇️</span> <span class="count">0</span>
+                        </button>
                     </div>
                 </div>
-            `;
-        }
+            </div>
+        </div>
+    </template>
 
-        function nextCard() {
-            if (currentIndex < filteredFallacies.length - 1) {
-                currentIndex++;
-                renderCard();
-            }
-        }
-
-        function prevCard() {
-            if (currentIndex > 0) {
-                currentIndex--;
-                renderCard();
-            }
-        }
-
-        function vote(id, type) {
-            const item = fallacies.find(f => f.id === id);
-            if (item) {
-                if (type === 'up') {
-                    item.votes.up++;
-                } else {
-                    item.votes.down++;
-                }
-                
-                const score = item.votes.up - item.votes.down;
-                const ageHours = (Date.now() / 1000 - item.timestamp) / 3600;
-                
-                if (ageHours < 24 && score > 2) {
-                    item.category = 'hot';
-                } else if (score > 5) {
-                    item.category = 'best';
-                }
-                
-                renderCard();
-                localStorage.setItem('fallacies', JSON.stringify(fallacies));
-            }
-        }
-
-        window.onload = loadFallacies;
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
