@@ -73,7 +73,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-          git add data/ docs/data/ output_images/ generated_cards/ || true
+          git add data/ docs/data/ docs/assets/ output_images/ generated_cards/ || true
 
           if git diff --staged --quiet; then
             echo "No changes to commit"
