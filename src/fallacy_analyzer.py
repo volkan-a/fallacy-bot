@@ -8,16 +8,13 @@ from huggingface_hub import InferenceClient
 
 # --- Konfigürasyon ---
 HF_TOKEN = os.getenv("HF_TOKEN")
-REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
-REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
-REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT", "FallacyTarotBot/1.0 by u/FallacyHunter")
 
 if not HF_TOKEN:
     raise ValueError("HF_TOKEN environment variable is not set!")
 
-# Hugging Face Client - Mixtral-8x7B daha yetenekli ve stabil
+# Hugging Face Client - Google Gemma 2B (Hızlı ve Ücretsiz)
 client = InferenceClient(token=HF_TOKEN)
-ANALYSIS_MODEL = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+ANALYSIS_MODEL = "google/gemma-2b-it"
 IMAGE_MODEL = "stabilityai/stable-diffusion-xl-base-1.0"
 
 # Sabitler
@@ -25,62 +22,73 @@ OUTPUT_DIR = "docs"
 ASSETS_DIR = os.path.join(OUTPUT_DIR, "assets")
 DATA_FILE = os.path.join(OUTPUT_DIR, "fallacies.json")
 
-# Mantık Hatası Türleri ve Tarot Temalı Promptları
-FALLACY_PROMPTS = {
-    "Ad Hominem": "Mystical tarot card illustration of a person attacking another person's character instead of their argument, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "Straw Man": "Mystical tarot card illustration of a scarecrow being fought instead of a real warrior, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "Appeal to Authority": "Mystical tarot card illustration of a blind follower worshipping a false idol, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "False Dilemma": "Mystical tarot card illustration of a fork in the road with only two paths shown while many exist, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "Slippery Slope": "Mystical tarot card illustration of a domino effect leading to catastrophe, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "Circular Reasoning": "Mystical tarot card illustration of an ouroboros snake eating its own tail, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "Hasty Generalization": "Mystical tarot card illustration of judging a whole forest by one tree, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "Red Herring": "Mystical tarot card illustration of a fish distracting from the real path, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "Tu Quoque": "Mystical tarot card illustration of two people pointing fingers at each other, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere",
-    "Appeal to Emotion": "Mystical tarot card illustration of hearts clouding judgment, dark fantasy style, gold borders, arcane symbols, intricate details, mystical atmosphere"
+# Mantık Hatası Türleri ve Sabit Tarot Promptları
+# Tema, aspect ratio ve stil sabittir, sadece konu değişir.
+BASE_IMAGE_PROMPT = (
+    "Mystical tarot card design, vertical aspect ratio 2:3, intricate gold borders, "
+    "dark magical background, esoteric symbolism, high quality digital art, fantasy illustration. "
+    "The central image symbolizes the logical fallacy: "
+)
+
+FALLACY_KEYWORDS = {
+    "Ad Hominem": "a shadowy figure attacking a person instead of their argument",
+    "Straw Man": "a scarecrow being fought instead of a real warrior",
+    "Appeal to Authority": "a blind follower worshipping a golden idol",
+    "False Dilemma": "a fork in the road with only two paths shown while many exist in the fog",
+    "Slippery Slope": "dominoes falling off a cliff into an abyss",
+    "Circular Reasoning": "an ouroboros snake eating its own tail forming a circle",
+    "Hasty Generalization": "judging a whole dark forest by a single twisted tree",
+    "Red Herring": "a glowing red fish distracting a traveler from the true path",
+    "Tu Quoque": "two figures pointing fingers at each other accusingly",
+    "Appeal to Emotion": "glowing hearts and tears clouding a crystal ball of judgment",
+    "Bandwagon": "a crowd of faceless people jumping off a cliff together",
+    "Begging the Question": "a snake biting its own tail in an infinite loop",
+    "No True Scotsman": "a guard denying entry to someone who fits the description",
+    "Genetic Fallacy": "judging a gift by the dirty hands holding it",
+    "Middle Ground": "two monsters compromising on the fate of a victim in the middle"
 }
 
 def get_reddit_posts():
-    """Reddit'ten popüler gönderileri çek (ücretsiz API, PRAW kullanmıyoruz)"""
-    # Daha geniş bir subreddit havuzu kullanarak 403 hatasını aşalım
-    subreddits = ["philosophy", "changemyview", "politics", "technology", "science", "worldnews"]
+    """Reddit'ten popüler gönderileri çek (ücretsiz JSON endpoint)"""
+    # r/worldnews/top.json?t=week kullanarak API key gerektirmeden veri çekiyoruz
+    url = "https://www.reddit.com/r/worldnews/top.json?t=week&limit=25"
+    headers = {'User-Agent': 'FallacyTarotBot/1.0'}
     posts = []
     
-    headers = {'User-Agent': REDDIT_USER_AGENT}
-    
-    for subreddit in subreddits:
-        url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit=10"
-        try:
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+        if response.status_code == 403:
+            print("⚠️  Reddit erişimi engellendi, alternatif deneniyor...")
+            # Alternatif olarak philosophy subreddit'ini dene
+            url = "https://www.reddit.com/r/philosophy/top.json?t=week&limit=25"
             response = requests.get(url, headers=headers, timeout=15)
-            if response.status_code == 403:
-                print(f"⚠️  r/{subreddit} erişimi engellendi, atlanıyor...")
-                continue
-            response.raise_for_status()
-            data = response.json()
+        
+        response.raise_for_status()
+        data = response.json()
+        
+        for child in data['data']['children']:
+            post_data = child['data']
+            text = post_data.get('selftext', '')
+            title = post_data.get('title', '')
             
-            for child in data['data']['children']:
-                post_data = child['data']
-                # Sadece metin içeren veya tartışma yaratabilecek başlıkları al
-                text = post_data.get('selftext', '')
-                title = post_data.get('title', '')
+            # İçerik uzunluğu kontrolü (çok kısa veya çok uzun olmasın)
+            content = text if text else title
+            if len(content) > 50 and len(content) < 800:
+                posts.append({
+                    'title': title,
+                    'text': content,
+                    'url': f"https://reddit.com{post_data['permalink']}",
+                    'score': post_data.get('score', 0),
+                    'author': post_data.get('author', 'anonymous'),
+                    'created_utc': post_data.get('created_utc', 0)
+                })
                 
-                # İçerik uzunluğu kontrolü
-                content = text if text else title
-                if len(content) > 40 and len(content) < 600:
-                    posts.append({
-                        'title': title,
-                        'text': content,
-                        'url': f"https://reddit.com{post_data['permalink']}",
-                        'score': post_data.get('score', 0),
-                        'author': post_data.get('author', 'anonymous'),
-                        'created_utc': post_data.get('created_utc', 0)
-                    })
-                    
-            if len(posts) >= 20:  # Yeterli veri topladık
-                break
-                
-        except Exception as e:
-            print(f"r/{subreddit} çekilirken hata: {e}")
-            continue
+        print(f"✅ Reddit'ten {len(posts)} gönderi başarıyla çekildi.")
+            
+    except Exception as e:
+        print(f"Reddit çekilirken hata: {e}")
+        # Hata durumunda boş liste dön, mock data kullanılsın
+        return []
             
     return posts
 
@@ -128,16 +136,17 @@ def analyze_fallacy(text):
         return {"fallacy_type": None, "confidence": 0, "explanation": "Analiz edilemedi", "quote": ""}
 
 def generate_tarot_image(fallacy_type, output_path):
-    """Tarot kartı görseli oluştur"""
-    if fallacy_type not in FALLACY_PROMPTS:
-        fallacy_type = "Ad Hominem"  # Varsayılan
+    """Tarot kartı görseli oluştur - Sabit stil, değişken konu"""
+    # Fallacy tipine göre anahtar kelimeyi al, yoksa varsayılan kullan
+    keyword = FALLACY_KEYWORDS.get(fallacy_type, "a mysterious symbol of logical error")
     
-    prompt = FALLACY_PROMPTS[fallacy_type]
+    # Sabit prompt ile değişken kısmı birleştir
+    full_prompt = BASE_IMAGE_PROMPT + keyword
     
     try:
-        image = client.text_to_image(prompt, model=IMAGE_MODEL)
+        image = client.text_to_image(full_prompt, model=IMAGE_MODEL)
         image.save(output_path)
-        print(f"Görsel başarıyla oluşturuldu: {output_path}")
+        print(f"🎨 '{fallacy_type}' için tarot kartı çizildi: {output_path}")
         return True
     except Exception as e:
         print(f"Image generation error: {e}")
